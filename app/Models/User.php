@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Arr;
+
 
 class User extends Authenticatable
 {
@@ -89,7 +91,7 @@ class User extends Authenticatable
         $projects = $this->userAccessibleProjects();
         $select = [];
         foreach ($projects as $project) {
-            $select = array_add($select, $project->id, $project->name);
+            $select = Arr::add($select, $project->id, $project->name);
         }
 
         return $select;

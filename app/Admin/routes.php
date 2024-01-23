@@ -17,5 +17,4 @@ Route::group([
     Route::post('/upload/action', 'UploadController@uploadAction')->name('upload.action');
     Route::post('/mygraphs', 'App\Admin\Controllers\FileController@store')->name('mygraphs.store');
     Route::delete('/file/delete/{file}', 'FileController@destroy')->name('file.delete');
-
 });

@@ -10,12 +10,12 @@ class File extends Model
 {
     use HasFactory;
     protected $appends = ['tooltip'];
-    protected $fillable = ['resource', 'filetype', 'public', 'user_id'];
+    protected $fillable = ['resource', 'filename', 'filetype', 'public', 'parsed' ,'user_id'];
 
 
     public function user()
     {
-        return $this->belongsTo("App\Models\User");
+        return $this->belongsTo(User::class);
     }
 
     public function projects()

@@ -21,7 +21,7 @@
                 @foreach ($files as $file)
                 <tr>
                     <td>{{ $file->id }}</td>
-                    <td>{{ $file->resource }}</td>
+                    <td>{{ session('uploaded_filename') }}</td>
 
                     <td>{{ $file->filetype}}</td>
                     <td>{{ $file->created_at }}</td>
@@ -32,8 +32,18 @@
                         <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
                         @endif
                     </td>
-                    <td>.....</td>
-                    <td><button class="btn btn-success">Run</button></td>
+                    <td class="text-center">@if($file->parsed)
+                        <img src="../img/check.png" alt="Check Icon">
+                        @else
+                        <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        <form action="{{ url('file/parse/'.$file->id) }}" method="POST">
+                         {!! csrf_field() !!}
+                        <button title="Parse this File" class="btn btn-success">Run<span class="btn btn-success"></span></button>
+                        </form>
+                    </td> 
                     <td class="text-center">
                         <form action="{{ route('file.delete', ['file' => $file->id]) }}" method="POST">
                             {!! csrf_field() !!}

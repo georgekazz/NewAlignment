@@ -4,6 +4,9 @@ namespace App\Admin\Controllers;
 
 use App\Models\File;
 use OpenAdmin\Admin\Controllers\AdminController;
+use OpenAdmin\Admin\Facades\Admin;
+use App\Jobs\Parse;
+
 
 class FileController extends AdminController
 {
@@ -14,9 +17,8 @@ class FileController extends AdminController
     {
         $user = auth()->user();
         $id = request('file');
-        
-        $files = File::all();
 
+        $files = File::all();
         return view('files.filetable', compact('files'));
     }
 
@@ -33,11 +35,14 @@ class FileController extends AdminController
                 $file = request()->file('file');
                 $filename = $file->getClientOriginalName();
                 $path = $file->storeAs('uploads', $filename);
+                session(['uploaded_filename' => $filename]);
             }
 
             $fileData = [
+                'filename' => $file->getClientOriginalName(),
                 'filetype' => request()->input('filetype'),
                 'public' => request()->input('access_type') === 'public',
+                'parsed' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -58,11 +63,20 @@ class FileController extends AdminController
     public function destroy($id)
     {
         $file = File::findOrFail($id);
-       // $this->authorize('destroy', $file);
+        // $this->authorize('destroy', $file);
         $file->delete();
 
         admin_toastr('File has been successfully deleted!', 'info', ['duration' => 5000]);
 
-        return redirect(admin_url('mygraphs'));    }
+        return redirect(admin_url('mygraphs'));
+    }
 
+    public function parse(File $file)
+    {
+        $currentUser = Admin::user();
+
+        Parse::dispatch($file, $currentUser)->onQueue('parse_jobs');
+
+        return redirect()->back();
+    }
 }

@@ -14,9 +14,11 @@ class CreateFilesTable extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('filename');
             $table->timestamps();
             $table->string('filetype');
             $table->boolean('public')->default('0');
+            $table->boolean('parsed')->default(false);
         });
     }
 

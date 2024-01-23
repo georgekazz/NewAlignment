@@ -31,8 +31,8 @@
     <link href="./vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
     <!-- Template Main CSS File -->
 
-    <link href="../resources/css/style.css" rel="stylesheet">
-    <link href="../resources/css/custom.css" rel="stylesheet">
+    <link href="../public/css/style.css" rel="stylesheet">
+    <link href="../public/css/custom.css" rel="stylesheet">
 
 
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -142,7 +142,7 @@
                             through a SPARQL endpoint and an API. Alignment is the outcome of the experience
                             working with heterogeneous public budget data, and has been used to align
                             SKOS Vocabularies describing budget data across diverse level of administrations
-                            of the EU and it’s member states.
+                            of the EU and its member states.
                         </p>
 
                     </div>
@@ -165,7 +165,7 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6">
                         <div class="icon-box" data-aos="zoom-in-left">
-                            <div class="icon"><img src="{{ asset('img/intro01.png') }}" alt="Your Image"></div>
+                            <div class="icon"><img src="{{ asset('../public/img/intro01.png') }}" alt="Your Image"></div>
                             <h4 class="title"><a>Community</a></h4>
                             <p class="description">See Github project, post issues and Pull requests</p>
                         </div>
@@ -336,8 +336,8 @@
     <script src="./vendor/swiper/swiper-bundle.min.js"></script>
     <script src="./vendor/php-email-form/validate.js"></script>
 
-    <!-- Template Main JS File -->
-    <script src="./js/main.js"></script>
+    <!-- Template Main JS File
+    <script src="../resource/js/main.js"></script> -->
 
 </body>
 
