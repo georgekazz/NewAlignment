@@ -26,6 +26,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/mygraphs', 'App\Admin\Controllers\FileController@store')->name('mygraphs.store');
     Route::get('/mygraphs', [FileController::class, 'mygraphs'])->name('mygraphs');
     Route::delete('/file/delete/{file}', [FileController::class, 'destroy'])->name('file.delete');
-    Route::post('file/parse/{file}', ['uses' => 'App\Admin\Controllers\FileController@parse', 'as' => 'file.parse']);
+    Route::post('/file/parse/{file}', [FileController::class, 'parse'])->name('mygraphs.parse');
 
 });

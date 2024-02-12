@@ -6,12 +6,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "easyrdf/easyrdf": "^1.1",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "open-admin-ext/helpers": "^1.0",
-        "open-admin-org/open-admin": "^1.0"
+        "ml/json-ld": "^1.0",
+        "open-admin-org/open-admin": "^1.0",
+        "semsol/arc2": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

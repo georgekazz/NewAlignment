@@ -4,20 +4,16 @@ namespace App\Admin\Controllers;
 
 use App\Models\File;
 use OpenAdmin\Admin\Controllers\AdminController;
-use OpenAdmin\Admin\Facades\Admin;
-use App\Jobs\Parse;
-
+use EasyRdf\Graph;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class FileController extends AdminController
 {
-
     protected $title = 'My ontologies';
 
     public function grid()
     {
-        $user = auth()->user();
-        $id = request('file');
-
         $files = File::all();
         return view('files.filetable', compact('files'));
     }
@@ -39,7 +35,8 @@ class FileController extends AdminController
             }
 
             $fileData = [
-                'filename' => $file->getClientOriginalName(),
+                'filename' => $filename,
+                'resource' => $path,
                 'filetype' => request()->input('filetype'),
                 'public' => request()->input('access_type') === 'public',
                 'parsed' => false,
@@ -54,7 +51,6 @@ class FileController extends AdminController
             return redirect(admin_url('mygraphs'));
 
         } catch (\Exception $e) {
-
             admin_toastr('File upload failed. Please try again', 'error', ['duration' => 5000]);
             return redirect(admin_url('mygraphs'));
         }
@@ -63,20 +59,77 @@ class FileController extends AdminController
     public function destroy($id)
     {
         $file = File::findOrFail($id);
-        // $this->authorize('destroy', $file);
         $file->delete();
 
-        admin_toastr('File has been successfully deleted!', 'info', ['duration' => 5000]);
+        admin_toastr('File has been successfully deleted!', 'success', ['duration' => 5000]);
 
         return redirect(admin_url('mygraphs'));
     }
 
     public function parse(File $file)
     {
-        $currentUser = Admin::user();
+        $graph = new Graph();
+        $filePath = Storage::path($file->resource);
 
-        Parse::dispatch($file, $currentUser)->onQueue('parse_jobs');
+        try {
+            if ($file->filetype != 'ntriples') {
 
-        return redirect()->back();
+                $convertedData = $this->convert($file);
+
+            } else {
+                $graph->parseFile($filePath, 'ntriples');
+            }
+            $file->parsed = true;
+            $file->save();
+
+            admin_toastr('Graph Parsed', 'success', ['duration' => 5000]);
+
+            return redirect(admin_url('mygraphs'));
+
+        } catch (\Exception $ex) {
+            $file->parsed = false;
+            $file->save();
+            Log::error($ex);
+            admin_toastr('Failed to parse the graph. Please check the logs.', 'error', ['duration' => 5000]);
+            return redirect(admin_url('mygraphs'));
+        }
+    }
+
+    public function convert(File $file)
+    {
+        // Απόλυτο μονοπάτι του αρχείου
+        $filePath = 'file:///' . storage_path('app/' . $file->resource);
+        logger('file path: ' . $filePath);
+
+        // Δημιουργούμε έναν RDF/XML παράγοντα
+        $rdfXmlParser = \ARC2::getRDFXMLParser();
+        //dd($rdfXmlParser);
+        logger(json_encode($rdfXmlParser));
+        $rdfXmlParser->parse($filePath);
+
+        // Φορτώνουμε τα δεδομένα από το αρχείο και ελέγχουμε εάν η ανάλυση είναι επιτυχής
+        if (count($rdfXmlParser->errors) == 0) {
+            $triples = $rdfXmlParser->getTriples();
+
+            $ser = \ARC2::getNTriplesSerializer();
+            /* Serialize a triples array */
+            $doc = $ser->getSerializedTriples($triples);
+
+            // Δημιουργούμε το αρχείο NTriples
+            $ntFileName = pathinfo($file->resource, PATHINFO_FILENAME) . '.nt';
+
+
+            $path = Storage::path($file->resource);
+            $ntFilePath = dirname($path) . '/' . $ntFileName;
+            file_put_contents($ntFilePath, $doc);
+
+            // Επιστρέφουμε το απόλυτο μονοπάτι του αρχείου NTriples
+            return $ntFilePath;
+        
+        } else {
+
+            return 'Error parsing RDF/XML';
+
+        }
     }
 }

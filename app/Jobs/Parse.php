@@ -43,9 +43,9 @@ class Parse implements ShouldQueue
         $this->invalidate();
 
         Rapper::withChain([
-            new Skosify($this->file, $user),
-            new CacheGraph($this->file, $user),
-        ])->dispatch($this->file, $user);
+            new Skosify($this->file, $this->user),
+            new CacheGraph($this->file, $this->user),
+        ])->dispatch($this->file, $this->user);
     }
 
     public function invalidate()
@@ -56,5 +56,4 @@ class Parse implements ShouldQueue
             Cache::forget($this->file->id . '_graph');
         }
     }
-
 }

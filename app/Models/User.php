@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Arr;
+use OpenAdmin\Admin\Auth\Database\Administrator;
 
 
 class User extends Authenticatable
@@ -31,6 +32,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function user()
+    {
+        // Επιστρέψτε τον χρήστη του OpenAdmin
+        return Administrator::find($this->id);
+    }
 
     public function links()
     {

@@ -48,7 +48,7 @@
                         <form action="{{ route('file.delete', ['file' => $file->id]) }}" method="POST">
                             {!! csrf_field() !!}
                             {!! method_field('DELETE') !!}
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button title="Delete this file" type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </td>
                 </tr>

@@ -21,7 +21,7 @@ class CacheGraph implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(File $file, User $user)
+    public function __construct(File $file, \OpenAdmin\Admin\Auth\Database\Administrator $user)
     {
         $this->file = $file;
         $this->user = $user;
