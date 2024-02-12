@@ -103,7 +103,7 @@ class FileController extends AdminController
 
         // Δημιουργούμε έναν RDF/XML παράγοντα
         $rdfXmlParser = \ARC2::getRDFXMLParser();
-        //dd($rdfXmlParser);
+        
         logger(json_encode($rdfXmlParser));
         $rdfXmlParser->parse($filePath);
 
