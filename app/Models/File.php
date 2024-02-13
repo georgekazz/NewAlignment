@@ -4,9 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Cache;
-use EasyRdf\Graph;
-use Illuminate\Database\Eloquent\Events\AfterSaving;
 
 
 class File extends Model

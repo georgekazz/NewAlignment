@@ -1,6 +1,7 @@
 <?php
 
 use App\Admin\Controllers\FileController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,5 +28,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/mygraphs', [FileController::class, 'mygraphs'])->name('mygraphs');
     Route::delete('/file/delete/{file}', [FileController::class, 'destroy'])->name('file.delete');
     Route::post('/file/parse/{file}', [FileController::class, 'parse'])->name('mygraphs.parse');
+
+    Route::get('/myprojects', [ProjectController::class, 'index'])->name('myprojects');
+
 
 });

@@ -72,16 +72,20 @@ class FileController extends AdminController
         $filePath = Storage::path($file->resource);
 
         try {
+
             if ($file->filetype != 'ntriples') {
 
                 $convertedData = $this->convert($file);
 
             } else {
+
                 $graph->parseFile($filePath, 'ntriples');
+
             }
+
             $file->parsed = true;
             $file->save();
-
+            
             admin_toastr('Graph Parsed', 'success', ['duration' => 5000]);
 
             return redirect(admin_url('mygraphs'));
@@ -103,8 +107,6 @@ class FileController extends AdminController
 
         // Δημιουργούμε έναν RDF/XML παράγοντα
         $rdfXmlParser = \ARC2::getRDFXMLParser();
-        
-        logger(json_encode($rdfXmlParser));
         $rdfXmlParser->parse($filePath);
 
         // Φορτώνουμε τα δεδομένα από το αρχείο και ελέγχουμε εάν η ανάλυση είναι επιτυχής
