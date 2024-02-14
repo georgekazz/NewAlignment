@@ -222,10 +222,13 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-
+                        
                         <!-- Silk -->
                         <div class="form-group">
-
+                            <label for="target">Select SiLK Framework Settings Profile</label>
+                            <select>
+                                <!-- settings -->
+                            </select>
                         </div>
 
                         <button type="submit" class="btn btn-success">Submit</button>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Admin\Controllers\ProjectController;
+use App\Admin\Controllers\SettingsController;
 use Illuminate\Routing\Router;
 
 Admin::routes();
@@ -20,5 +21,7 @@ Route::group([
     Route::delete('/file/delete/{file}', 'FileController@destroy')->name('file.delete');
     Route::get('/myprojects', [ProjectController::class, 'index'])->name('myprojects');
 
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('/settings', ['uses' => 'SettingsController@create', 'as' => 'settings.create']);
 
 });

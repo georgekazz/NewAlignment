@@ -30,6 +30,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/file/parse/{file}', [FileController::class, 'parse'])->name('mygraphs.parse');
 
     Route::get('/myprojects', [ProjectController::class, 'index'])->name('myprojects');
+    Route::post('/settings', ['uses' => 'SettingsController@create', 'as' => 'settings.create']);
 
 
 });
