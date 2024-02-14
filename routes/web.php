@@ -1,7 +1,8 @@
 <?php
 
 use App\Admin\Controllers\FileController;
-use App\Http\Controllers\ProjectController;
+use App\Admin\Controllers\ProjectController;
+use App\Admin\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,7 +31,9 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/file/parse/{file}', [FileController::class, 'parse'])->name('mygraphs.parse');
 
     Route::get('/myprojects', [ProjectController::class, 'index'])->name('myprojects');
-    Route::post('/settings', ['uses' => 'SettingsController@create', 'as' => 'settings.create']);
+    
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('/settings','App\Admin\Controllers\SettingsController@create') -> name('settings.create');
 
 
 });

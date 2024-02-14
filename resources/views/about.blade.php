@@ -1,21 +1,19 @@
-<!DOCTYPE html>
-<html>
+<style>
+    pre {
+        background-color: #f4f4f4;
+        padding: 10px;
+        border: 1px solid #ccc;
+        font-family: Consolas, monospace;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+</style>
 
-<head>
-    <title>About</title>
-    <style>
-        pre {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border: 1px solid #ccc;
-            font-family: Consolas, monospace;
-            font-size: 14px;
-        }
-    </style>
-</head>
 
 <body>
-    <h1>About</h1>
     <pre>
         <code>
             Ontology matching is a crucial problem in the world of Semantic Web and other distributed, open world
@@ -35,6 +33,5 @@
             administrations of the EU and its member states.
         </code>
     </pre>
+    <img src="../img/okfgr.png" alt="Image Description" width="600" height="300" style="display: block; margin: 0 auto;">
 </body>
-
-</html>

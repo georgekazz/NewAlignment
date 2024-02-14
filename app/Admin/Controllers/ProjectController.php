@@ -14,10 +14,4 @@ class ProjectController extends AdminController
         $projects = Project::all();
         return view('projects.projecttable', compact('projects'));
     }
-
-    // public function show($id)
-    // {
-    //     $project = Project::findOrFail($id);
-    //     return view('projects.show', compact('project'));
-    // }
 }

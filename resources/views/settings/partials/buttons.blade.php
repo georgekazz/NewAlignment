@@ -21,8 +21,9 @@
             </div>
             <div class="modal-body">
                 <div class="modal-body">
-                    <form action="{{ action('SettingsController@create') }}" method="POST" enctype="multipart/form-data">
-
+                    <form action="{{ action('SettingsController@create') }}" method="POST"
+                        enctype="multipart/form-data">
+                        {{ csrf_field() }}
                         <!-- File Upload Label -->
                         <label class="form-label">File Upload</label>
                         <input type="file" id="fileUpload" class="form-control" name="file" accept="">
