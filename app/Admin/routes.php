@@ -16,6 +16,10 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('home');
     $router->resource('profile', \App\Admin\Controllers\ProfileController::class);
     $router->resource('mygraphs', \App\Admin\Controllers\FileController::class);
+    $router->get('/about', function () {
+        return view('about');
+    })->name('about');
+    
     Route::post('/upload/action', 'UploadController@uploadAction')->name('upload.action');
     Route::post('/mygraphs', 'App\Admin\Controllers\FileController@store')->name('mygraphs.store');
     Route::delete('/file/delete/{file}', 'FileController@destroy')->name('file.delete');
@@ -23,5 +27,5 @@ Route::group([
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings', ['uses' => 'SettingsController@create', 'as' => 'settings.create']);
-
+    
 });

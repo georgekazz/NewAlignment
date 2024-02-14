@@ -12,6 +12,9 @@ class SettingsController extends AdminController
 {
     protected $title = 'Settings';
 
+
+    //functions destroy export copy errors missing
+
     public function grid()
     {
         $user = Auth::guard('admin')->user();
@@ -32,7 +35,8 @@ class SettingsController extends AdminController
         return redirect(admin_url('settings'));
     }
 
-    public function render() {
+    public function render()
+    {
         $file = "/app/projects/default_config.xml";
         $filename = storage_path() . $file;
         $xml = file_get_contents($filename);

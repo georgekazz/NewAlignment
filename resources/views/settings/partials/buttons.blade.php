@@ -5,8 +5,9 @@
 </button>
 
 <!-- Reload button -->
-<button onclick="reload()" class="btn btn-primary" title="Reload"><span
-        class="glyphicon glyphicon-refresh"></span></button>
+<button onclick="reload()" class="btn btn-primary" title="Reload">
+    <img src="../img/refreshicon.png" alt="Refresh" width="20" height="20">
+</button>
 
 
 <!-- Modal Form -->
