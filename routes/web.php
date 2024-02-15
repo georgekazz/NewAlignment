@@ -35,5 +35,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings','App\Admin\Controllers\SettingsController@create') -> name('settings.create');
 
-
+    Route::get('/settings/ajax','App\Admin\Controllers\SettingsController@ajax')-> name('settings.ajax');
+    Route::get('settings/validate','App\Admin\Controllers\SettingsController@validateSettingsFile')->name('settings.validate');
 });

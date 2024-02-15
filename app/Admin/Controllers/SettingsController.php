@@ -8,7 +8,8 @@ use OpenAdmin\Admin\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SuggestionConfigurations\SilkConfiguration;
 use Storage;
-
+use App\Models\SuggestionProvider;
+use Yajra\Datatables\Datatables;
 
 class SettingsController extends AdminController
 {
@@ -20,16 +21,20 @@ class SettingsController extends AdminController
     public function grid()
     {
         $user = Auth::guard('admin')->user();
-        $providers = \App\Models\SuggestionProvider::all();
+        $providers = SuggestionProvider::all();
+
 
         return view('settings', ['user' => $user, 'providers' => $providers]);
     }
 
     public function create(\OpenAdmin\Admin\Layout\Content $content)
     {
+
+        $user = Auth::guard('admin')->user();
         $input = request()->all();
-        dd($input);
-        
+        $input['user_id'] = $user->id;
+        //dd($input);
+
         $input = array_filter($input);
         $settings = Settings::create($input);
         $settings->provider->validate($settings);
@@ -82,6 +87,19 @@ class SettingsController extends AdminController
         Storage::disk("projects")->put("/project" . $project->id . "/project" . $project->id . "_config.xml", $config);
     }
 
+
+    public function ajax()
+    {
+        $settings = Settings::select(['id', 'name', 'public', 'valid']);
+
+        return Datatables::of($settings)
+            ->addColumn('action', function ($setting) {
+                return view("settings.partials.actions", [
+                    "setting" => $setting
+                ]);
+            })
+            ->make(true);
+    }
 
 
 

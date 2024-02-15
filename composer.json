@@ -11,10 +11,11 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "open-admin-ext/helpers": "^1.0",
         "ml/json-ld": "^1.0",
+        "open-admin-ext/helpers": "^1.0",
         "open-admin-org/open-admin": "^1.0",
-        "semsol/arc2": "^3.0"
+        "semsol/arc2": "^3.0",
+        "yajra/laravel-datatables-oracle": "^10.11"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

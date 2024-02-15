@@ -2,22 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SuggestionProvider extends Model
 {
-    protected $fillable = [ "name", "description", "configuration"];
+    use HasFactory;
+    protected $fillable = ["name", "description", "configuration"];
+    
 
-    public function validate(\App\Models\Settings $settings){
+    public function validate(Settings $settings)
+    {
         $configuration = new $this->configuration();
         $settings->valid = json_decode($configuration->validateSettingsFile($settings)->bag)->valid;
         $settings->save();
     }
 
-    public function prepare(\App\Models\Project $project){
+    public function prepare(Project $project)
+    {
         $configuration = new $this->configuration();
         $configuration->prepareProject($project);
     }
-
-
 }

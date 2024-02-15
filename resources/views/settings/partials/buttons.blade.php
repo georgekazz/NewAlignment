@@ -21,12 +21,12 @@
             </div>
             <div class="modal-body">
                 <div class="modal-body">
-                    <form action="{{ action('SettingsController@create') }}" method="POST"
+                    <form action="{{ action('App\Admin\Controllers\SettingsController@create') }}" method="POST"
                         enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <!-- File Upload Label -->
                         <label class="form-label">File Upload</label>
-                        <input type="file" id="fileUpload" class="form-control" name="file" accept="">
+                        <input type="file" id="inputFile" class="form-control" name="inputFile" accept="" required="true">
                         <p>Attach a valid provider specific configuration file </p>
 
 
@@ -34,22 +34,26 @@
                         <div class="mb-3">
                             <label class="form-label">Select Suggestions Provider</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="filetype" id="silk" value="silk">
-                                <label class="form-check-label" for="silk">
-                                    Silk
-                                </label>
+                                @foreach($providers as $provider)
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="suggestion_provider_id" value="{{$provider->id}}">
+                                        {{$provider->name}}
+                                    </label>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
 
                         <!-- User Name Label -->
                         <div class="mb-3">
                             <label class="form-label">Enter a user friendly name</label>
-                            <input type="text" class="form-control" name="username" id="username" required>
+                            <input type="text" class="form-control" name="name" id="name" required>
                         </div>
 
                         <!-- Access Type -->
                         <div class="mb-3">
-                            <label class="form-label">Choose Access Type</label>
+                            <label class="form-label">Select settings ownership</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="access_type" id="public"
                                     value="public">
