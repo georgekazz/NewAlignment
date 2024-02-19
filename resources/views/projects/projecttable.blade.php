@@ -222,12 +222,21 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
-                        <!-- Silk -->
+
+                        <!-- Silk Selection -->
                         <div class="form-group">
                             <label for="target">Select SiLK Framework Settings Profile</label>
-                            <select>
-                                <!-- settings -->
+                            <select name="settings_profile"> <!-- Προσθέτουμε το χαρακτηριστικό name -->
+                                <?php
+                                    use \App\Models\Settings;
+                                    use Illuminate\Support\Arr;
+                                    
+                                    $settings = Settings::where("valid", true)->get();
+                                ?>
+                                <!-- Προσθεση των επιλογων -->
+                                @foreach($settings as $setting)
+                                <option value="{{ $setting->id }}">{{ $setting->name }}</option>
+                                @endforeach
                             </select>
                         </div>
 

@@ -18,26 +18,3 @@
     }
 
 </script>
-
-@push('scripts')
-<script>
-$(function() {
-    table = $('#settings-table').DataTable({
-        destroy:true,
-        processing: true,
-        serverSide: true,
-        ajax: {
-            "url" : '{!! route('settings.ajax') !!}',
-            "type" : "GET",            
-        },
-        columns: [
-            {data: 'id', name: 'id'},
-            {data: 'name', name: 'name'},
-            {data: 'public', name: 'public'},
-            {data: 'valid', name: 'valid'},
-            {data: 'action', name: 'action', orderable: false, searchable: false}
-        ]
-    });
-});            
-</script>
-@endpush

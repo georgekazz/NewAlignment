@@ -11,7 +11,7 @@
 
 
 <!-- Modal Form -->
-<div class="modal fade" id="create-settings-dialog" tabindex="-1" aria-labelledby="createProjectModalLabel"
+<div class="modal fade" id="create-settings-dialog" tabindex="-1"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -51,7 +51,7 @@
                             <input type="text" class="form-control" name="name" id="name" required>
                         </div>
 
-                        <!-- Access Type -->
+                        <!-- Access Type public-private -->
                         <div class="mb-3">
                             <label class="form-label">Select settings ownership</label>
                             <div class="form-check">

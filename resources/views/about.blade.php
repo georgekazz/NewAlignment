@@ -33,5 +33,5 @@
             administrations of the EU and its member states.
         </code>
     </pre>
-    <img src="../img/okfgr.png" alt="Image Description" width="600" height="300" style="display: block; margin: 0 auto;">
+    <img src="../img/okfngr.png" alt="Image Description" width="600" height="180" style="display: block; margin: 0 auto;">
 </body>

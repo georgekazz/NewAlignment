@@ -32,9 +32,11 @@ class SettingsController extends AdminController
 
         $user = Auth::guard('admin')->user();
         $input = request()->all();
-        $input['user_id'] = $user->id;
-        //dd($input);
 
+        $input['user_id'] = $user->id;
+        $input['public'] = ($input['access_type'] == 'public') ? 1 : 0;
+        $input['valid'] = 1;
+        
         $input = array_filter($input);
         $settings = Settings::create($input);
         $settings->provider->validate($settings);
