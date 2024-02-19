@@ -37,4 +37,7 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::get('/settings/ajax','App\Admin\Controllers\SettingsController@ajax')-> name('settings.ajax');
     Route::get('settings/validate','App\Admin\Controllers\SettingsController@validateSettingsFile')->name('settings.validate');
+
+    Route::post('/myprojects', 'App\Admin\Controllers\ProjectController@create') -> name('myprojects.create');
+
 });

@@ -36,10 +36,10 @@ class SettingsController extends AdminController
         $input['user_id'] = $user->id;
         $input['public'] = ($input['access_type'] == 'public') ? 1 : 0;
         $input['valid'] = 1;
-        
+
         $input = array_filter($input);
         $settings = Settings::create($input);
-        $settings->provider->validate($settings);
+        // $settings->provider->validate($settings);
 
         admin_toastr('Settings Created!', 'success', ['duration' => 5000]);
 

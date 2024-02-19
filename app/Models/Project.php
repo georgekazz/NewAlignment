@@ -13,27 +13,27 @@ class Project extends Model
 
     public function user()
     {
-        return $this->belongsTo("App\User");
+        return $this->belongsTo("App\Models\User");
     }
 
     public function source()
     {
-        return $this->hasOne('App\File', 'id', 'source_id');
+        return $this->hasOne('App\Models\File', 'id', 'source_id');
     }
 
     public function target()
     {
-        return $this->hasOne('App\File', 'id', 'target_id');
+        return $this->hasOne('App\Models\File', 'id', 'target_id');
     }
 
     public function links()
     {
-        return $this->hasMany('App\Link');
+        return $this->hasMany('App\Models\Link');
     }
 
     public function settings()
     {
-        return $this->hasOne('App\Settings', 'id', 'settings_id');
+        return $this->hasOne('App\Models\Settings', 'id', 'settings_id');
     }
 
 }

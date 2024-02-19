@@ -93,10 +93,9 @@
                     @foreach ($projects as $project)
                     <tr>
                         <td>{{ $project->name }}</td>
-                        <td><a href='profile/{{$project->user->id}}' title='Show user profile'>{{ $project->user->name
-                                }}</a></td>
-                        <td>{{ $project->source->resource_file_name}}</td>
-                        <td>{{ $project->target->resource_file_name}}</td>
+                        <td><a href='profile/{{$project->admin_user}}' title='Show user profile'>{{ $project->user_id }}</a></td>
+                        <td>{{ $project->source->filename}}</td>
+                        <td>{{ $project->target->filename}}</td>
                         <td class="text-center">@if($project->public)
                             <span class="glyphicon glyphicon-ok-sign text-green" title="This project is Public"></span>
                             @else
@@ -152,9 +151,9 @@
             </div>
             <div class="modal-body">
                 <div class="modal-body">
-                    <form action="{{ route('mygraphs.store') }}" method="POST" enctype="multipart/form-data">
-
+                    <form action="{{ route('myprojects.create') }}" method="POST" enctype="multipart/form-data">
                         <!-- Give Name Label -->
+                        {{ csrf_field() }}
                         <div class="mb-3">
                             <label for="file" class="form-label">Give a simple name to your project.</label>
                             <input type="text" name="name" required>
@@ -188,7 +187,7 @@
                                 if ($file->parsed) {
                                     $key = $file->id;
                                     $value = $file->filename;
-                                    $select = array_add($select, $key, $value);
+                                    $select[$key] = $value;
                                 }
                             }
                             $files = App\Models\File::where('public', '=', '1')->get();

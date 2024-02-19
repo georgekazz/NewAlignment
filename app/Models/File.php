@@ -19,6 +19,6 @@ class File extends Model
 
     public function projects()
     {
-        return $this->belongsToMany('App\Project', 'file_project', 'file_id', 'project_id');
+        return $this->belongsToMany('App\Models\Project', 'file_project', 'file_id', 'project_id');
     }
 }
