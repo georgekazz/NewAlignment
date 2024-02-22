@@ -1,6 +1,7 @@
 <button type="button" class="btn btn-primary custom-btn" data-bs-toggle="modal" data-bs-target="#uploadModal">
     Upload New Graph
 </button>
+<p></p>
 <div class="container">
     <div class="row">
         <table class="table">

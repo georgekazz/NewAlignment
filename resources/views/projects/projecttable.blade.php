@@ -63,7 +63,7 @@
     <button type="button" class="btn btn-primary custom-btn" data-bs-toggle="modal" data-bs-target="#createProject">
         Create New Project
     </button>
-
+    <p></p>
     <!-- Tabs -->
     <div>
         <div class="tab active-tab">My Projects</div>
@@ -93,7 +93,8 @@
                     @foreach ($projects as $project)
                     <tr>
                         <td>{{ $project->name }}</td>
-                        <td><a href='profile/{{$project->admin_user}}' title='Show user profile'>{{ $project->user_id }}</a></td>
+                        <td><a href='profile/{{$project->admin_user}}' title='Show user profile'>{{ $project->user_id
+                                }}</a></td>
                         <td>{{ $project->source->filename}}</td>
                         <td>{{ $project->target->filename}}</td>
                         <td class="text-center">@if($project->public)
@@ -108,30 +109,29 @@
                         <!-- Action Buttons -->
                         <td class="text-center">
                             <form action="{{ url('settings/create_config/'.$project->id) }}" method="POST">
-                                <button title="Calculate Similarities" class="btn"><span
-                                        class="glyphicon glyphicon-link text-green"></span></button>
+                                <button title="Calculate Similarities" class="btn btn-primary custom-btn">
+                                    <img src="../img/link.png" alt="Edit Icon" class="small-icon" height="20"
+                                        width="20">
+                                </button>
                             </form>
                         </td>
                         <td class="text-center">
                             <form action="{{ url('createlinks/'.$project->id) }}" method="GET">
-
                                 <button title="Create New Links"
-                                    class="btn <?php if(!$project->processed){echo 'disabled';}?>"><span
-                                        class="glyphicon glyphicon-play text-blue"></span></button>
+                                    class="btn btn-primary custom-btn <?php if(!$project->processed){echo 'disabled';}?>">
+                                    <img src="../img/play-button.png" alt="Edit Icon" class="small-icon" height="20"
+                                        width="20">
+                                </button>
                             </form>
                         </td>
                         <td class="text-center">
                             <form action="{{ url('project/delete/'.$project->id) }}" method="POST">
                                 {!! csrf_field() !!}
                                 {!! method_field('DELETE') !!}
-                                <button title="Delete this Project" class="btn"><span
-                                        class="glyphicon glyphicon-remove text-red"></span></button>
+                                <button title="Delete this Project" class="btn btn-primary custom-btn">
+                                    <img src="../img/bin.png" alt="Edit Icon" class="small-icon" height="20" width="20">
+                                </button>
                             </form>
-                        </td>
-                        <td class="text-center">
-                            <button title="Edit this Project" class="btn" data-toggle="modal"
-                                data-project="{{$project->id}}" data-target="#editProject"><span
-                                    class="glyphicon glyphicon-cog text-black"></span></button>
                         </td>
                     </tr>
                     @endforeach
