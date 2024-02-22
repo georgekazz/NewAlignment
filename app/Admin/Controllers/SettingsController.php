@@ -89,6 +89,12 @@ class SettingsController extends AdminController
         Storage::disk("projects")->put("/project" . $project->id . "/project" . $project->id . "_config.xml", $config);
     }
 
+    public function destroy($id)
+    {
+        Settings::destroy($id);
+        return "Settings with id " . $id . " was deleted";
+    }
+
 
     public function ajax()
     {

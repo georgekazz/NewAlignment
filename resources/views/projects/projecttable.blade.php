@@ -105,7 +105,7 @@
                         </td>
                         <td>{{ $project->created_at }}</td>
 
-                        <!-- Buttons -->
+                        <!-- Action Buttons -->
                         <td class="text-center">
                             <form action="{{ url('settings/create_config/'.$project->id) }}" method="POST">
                                 <button title="Calculate Similarities" class="btn"><span
