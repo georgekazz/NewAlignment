@@ -86,7 +86,6 @@
                         <th class="text-center"></th>
                         <th class="text-center"></th>
                         <th class="text-center"></th>
-                        <th class="text-center"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,10 +97,9 @@
                         <td>{{ $project->source->filename}}</td>
                         <td>{{ $project->target->filename}}</td>
                         <td class="text-center">@if($project->public)
-                            <span class="glyphicon glyphicon-ok-sign text-green" title="This project is Public"></span>
+                            <img src="../img/check.png" alt="Edit Icon" class="small-icon" height="20" width="20">
                             @else
-                            <span class="glyphicon glyphicon-ban-circle text-red"
-                                title="This project is Private"></span>
+                            <img src="../img/cross.png" alt="Edit Icon" class="small-icon" height="20" width="20">
                             @endif
                         </td>
                         <td>{{ $project->created_at }}</td>
@@ -109,6 +107,7 @@
                         <!-- Action Buttons -->
                         <td class="text-center">
                             <form action="{{ url('settings/create_config/'.$project->id) }}" method="POST">
+                                @csrf
                                 <button title="Calculate Similarities" class="btn btn-primary custom-btn">
                                     <img src="../img/link.png" alt="Edit Icon" class="small-icon" height="20"
                                         width="20">
@@ -125,7 +124,7 @@
                             </form>
                         </td>
                         <td class="text-center">
-                            <form action="{{ url('project/delete/'.$project->id) }}" method="POST">
+                            <form action="{{ url('myprojects/delete/'.$project->id) }}" method="POST">
                                 {!! csrf_field() !!}
                                 {!! method_field('DELETE') !!}
                                 <button title="Delete this Project" class="btn btn-primary custom-btn">
@@ -140,6 +139,8 @@
         </div>
     </div>
 </body>
+
+
 
 <!-- Modal Form -->
 <div class="modal fade" id="createProject" tabindex="-1" aria-labelledby="createProjectModalLabel" aria-hidden="true">
@@ -225,7 +226,7 @@
                         <!-- Silk Selection -->
                         <div class="form-group">
                             <label for="target">Select SiLK Framework Settings Profile</label>
-                            <select name="settings_profile"> <!-- Προσθέτουμε το χαρακτηριστικό name -->
+                            <select name="settings_id"> <!-- Προσθέτουμε το χαρακτηριστικό name -->
                                 <?php
                                     use \App\Models\Settings;
                                     use Illuminate\Support\Arr;
