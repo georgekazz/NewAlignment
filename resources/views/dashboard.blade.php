@@ -66,7 +66,7 @@
             <div class="menu-item">
                 <h3>Projects</h3>
                 <h6>Create or edit a Project and start creating Links</h6>
-                <a href="#">Click for more</a>
+                <a href="/newalignment/public/admin/myprojects">Click for more</a>
             </div>
             <div class="menu-item">
                 <h3>My Links</h3>
@@ -76,7 +76,7 @@
             <div class="menu-item">
                 <h3>Comparison Settings</h3>
                 <h6>Fine Tune Suggestion Provider Settings</h6>
-                <a href="#">Click for more</a>
+                <a href="/newalignment/public/admin/settings">Click for more</a>
             </div>
         </div>
     </div>

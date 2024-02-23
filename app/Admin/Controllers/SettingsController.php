@@ -16,13 +16,12 @@ class SettingsController extends AdminController
     protected $title = 'Settings';
 
 
-    //functions destroy, export, copy, errors, ajax,  missing
+    //functions , export, copy, errors, ,  missing
 
     public function grid()
     {
         $user = Auth::guard('admin')->user();
         $providers = SuggestionProvider::all();
-
 
         return view('settings', ['user' => $user, 'providers' => $providers]);
     }
