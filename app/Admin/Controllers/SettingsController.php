@@ -66,7 +66,7 @@ class SettingsController extends AdminController
         $project = Project::find($project_id);
         $project->processed = 0;
         $project->save();
-        $provider = $project->settings->provider;
+        $provider = $project->settings ? $project->settings->provider : null;
         $provider->prepare($project);
         admin_toastr('SiLK Config File Created succesfully!', 'success', ['duration' => 5000]);
         dispatch(new $provider->job($project, auth()->user()));
