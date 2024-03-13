@@ -13,16 +13,15 @@ class SuggestionProvider extends Model
 
     public function validate(Settings $settings)
     {
-        $configurationClass = $this->configuration;
-        $configuration = new $configurationClass();
+        $configuration = new $this->configuration();
+        dd($configuration);
         $settings->valid = json_decode($configuration->validateSettingsFile($settings)->bag)->valid;
         $settings->save();
     }
 
     public function prepare(Project $project)
     {
-        $configurationClass = $this->configuration;
-        $configuration = new $configurationClass();
+        $configuration = new $this->configuration();
         $configuration->prepareProject($project);
     }
 }

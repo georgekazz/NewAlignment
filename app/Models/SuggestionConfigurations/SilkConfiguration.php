@@ -2,11 +2,11 @@
 
 namespace App\Models\SuggestionConfigurations;
 
-use App\Project;
-use App\Settings;
+use App\Models\Project;
+use App\Models\Settings;
 use Storage;
 use Cache;
-
+use EasyRdf\Graph;
 
 class SilkConfiguration
 {
@@ -17,18 +17,19 @@ class SilkConfiguration
         "{}Outputs"
     ];
 
-    public function prepareProject(Project $project) {
+    public function prepareProject(Project $project)
+    {
         //create project folder
 
         Storage::disk("projects")->makeDirectory("project" . $project->id);
 
         //copy source ontology
-        $suffix1 = ($project->source->filetype != 'ntriples' ) ? '.nt' : '';
+        $suffix1 = ($project->source->filetype != 'ntriples') ? '.nt' : '';
         $source = file_get_contents($project->source->resource->path() . $suffix1);
         Storage::disk("projects")->put("/project" . $project->id . "/source.nt", $source);
 
         //copy target ontology
-        $suffix2 = ($project->target->filetype != 'ntriples' ) ? '.nt' : '';
+        $suffix2 = ($project->target->filetype != 'ntriples') ? '.nt' : '';
         $target = file_get_contents($project->target->resource->path() . $suffix2);
         Storage::disk("projects")->put("/project" . $project->id . "/target.nt", $target);
         //create the config
@@ -38,7 +39,8 @@ class SilkConfiguration
         return 0;
     }
 
-    public function reconstruct($id) {
+    public function reconstruct($id)
+    {
         $settings = Settings::find($id);
         $settings_xml = file_get_contents($settings->resource->path());
         $new = $this->parseXML($settings_xml);
@@ -52,7 +54,9 @@ class SilkConfiguration
         $newDatasource = $this->createDatasource($datasources->first());
 
         $service = new \Sabre\Xml\Service();
-        $xml = $service->write('Silk', [
+        $xml = $service->write(
+            'Silk',
+            [
                 $prefixes->first(),
                 $newDatasource,
                 $linkage->first(),
@@ -62,19 +66,22 @@ class SilkConfiguration
         return $xml;
     }
 
-    public function getNode($collection, $name) {
+    public function getNode($collection, $name)
+    {
         $node = collect($collection->where("name", $name));
         return $node;
     }
 
-    public function parseXML($xml) {
+    public function parseXML($xml)
+    {
 
         $service = new \Sabre\Xml\Service();
         $result = collect($service->parse($xml));
         return $result;
     }
 
-    public function createOutput($originalOutput) {
+    public function createOutput($originalOutput)
+    {
         $minConcfidence = $originalOutput["value"][0]["attributes"]["minConfidence"];
         $newOutput = [
             "name" => "Outputs",
@@ -112,8 +119,10 @@ class SilkConfiguration
         return $newOutput;
     }
 
-    public function filenameTemplate($filename) {
-        return [ "name" => "{}Param",
+    public function filenameTemplate($filename)
+    {
+        return [
+            "name" => "{}Param",
             "value" => null,
             "attributes" => [
                 "name" => "file",
@@ -122,8 +131,10 @@ class SilkConfiguration
         ];
     }
 
-    public function formatTemplate() {
-        return [ "name" => "{}Param",
+    public function formatTemplate()
+    {
+        return [
+            "name" => "{}Param",
             "value" => null,
             "attributes" => [
                 "name" => "format",
@@ -132,7 +143,8 @@ class SilkConfiguration
         ];
     }
 
-    public function createDataset($dataset, $filename) {
+    public function createDataset($dataset, $filename)
+    {
         $name = $dataset["name"];
         $file = $this->filenameTemplate($filename);
         $format = $this->formatTemplate();
@@ -149,7 +161,8 @@ class SilkConfiguration
         ];
     }
 
-    public function createDatasource($originalDataSource) {
+    public function createDatasource($originalDataSource)
+    {
         $source = $this->createDataset($originalDataSource["value"][0], "source.nt");
         $target = $this->createDataset($originalDataSource["value"][1], "target.nt");
         return [
@@ -162,22 +175,22 @@ class SilkConfiguration
         ];
     }
 
-    public function validateSettingsFile(Settings $settings) {
+    public function validateSettingsFile(Settings $settings)
+    {
 
         libxml_use_internal_errors(true);
         $schema = $this->validateSchema($settings->resource->path());
-        $validationError = \App\ValidationError::create();
-        $validationError->bag = $schema;
-        $validationError->setting_id = $settings->id;
-        $validationError->save();
-        return $validationError;
+        admin_toastr('An error occurred!', 'error', ['duration' => 5000]);
+        return $schema;
     }
 
-    public function validateXML($xml) {
+    public function validateXML($xml)
+    {
         return 1;
     }
 
-    public function validateAlignment(Settings $settings) {
+    public function validateAlignment(Settings $settings)
+    {
         $xml = file_get_contents($settings->resource->path());
         $parsed = $this->parseXML($xml);
         $linkage = $this->getNode($parsed, $this->nodes[2]);
@@ -187,7 +200,8 @@ class SilkConfiguration
         }
     }
 
-    public function validateSchema($file) {
+    public function validateSchema($file)
+    {
         libxml_use_internal_errors(true);
         $xml = new \DOMDocument();
         $errors = [];
@@ -205,15 +219,12 @@ class SilkConfiguration
         return collect($bag);
     }
 
-    public function runSiLK(Project $project, $user_id) {
+    public function runSiLK(Project $project, $user_id)
+    {
         $id = $project->id;
         $filename = storage_path() . "/app/projects/project" . $id . "/project" . $id . "_config.xml";
-        \App\Notification::create([
-            "message" => 'Started Job...',
-            "user_id" => $user_id,
-            "project_id" => $project->id,
-            "status" => 2,
-        ]);
+        admin_toastr('Started Job...', 'info', ['duration' => 5000]);
+
         exec('java -d64 -Xms2048M -Xmx4096M -DconfigFile=' . $filename . ' -Dreload=true -Dthreads=4 -jar ' . app_path() . '/functions/silk/silk.jar');
         //$settingsID = $project->settings->id;
         if (Storage::disk("projects")->exists("/project" . $project->id . "/score_project" . $project->id . ".nt")) {
@@ -221,47 +232,32 @@ class SilkConfiguration
         }
         //Storage::disk("projects")->move("/project" . $project->id . "/score.nt", "/project" . $project->id . "/score_project" . $project->id . ".nt");
 
-        \App\Notification::create([
-            "message" => 'Finished SiLK similarities Calculations...',
-            "user_id" => $user_id,
-            "project_id" => $project->id,
-            "status" => 2,
-        ]);
+        admin_toastr('Finished SiLK similarities Calculations...', 'info', ['duration' => 5000]);
         dispatch(new \App\Jobs\ParseScores($project, $user_id));
         //$this->parseScore($project, $user_id);
         dispatch(new \App\Jobs\Convert($project, $user_id, "source"));
         dispatch(new \App\Jobs\Convert($project, $user_id, "target"));
     }
 
-    public function parseScore(Project $project, $user_id){
+    public function parseScore(Project $project, $user_id)
+    {
         $old_score = storage_path() . "/app/projects/project" . $project->id . "/" . "score.nt";
         $score_filepath = storage_path() . "/app/projects/project" . $project->id . "/" . "score_project" . $project->id . ".nt";
-        try{
+        try {
             $command = 'rapper -i rdfxml -o ntriples ' . $old_score . ' > ' . $score_filepath;
             $out = [];
             logger($command);
-            exec( $command, $out);
+            exec($command, $out);
             logger(var_dump($out));
-            \App\Notification::create([
-                "message" => 'Converted Score Graph...',
-                "user_id" => $user_id,
-                "project_id" => $project->id,
-                "status" => 2,
-            ]);
-        }
-        catch(\Exception $ex){
+            admin_toastr('Converted Score Graph...', 'success', ['duration' => 5000]);
+
+        } catch (\Exception $ex) {
             logger($ex);
         }
-        try{
-            $scores = new \EasyRdf_Graph;
+        try {
+            $scores = new Graph;
             $scores->parseFile($score_filepath, "ntriples");
-
-            \App\Notification::create([
-                "message" => 'Parsed and Stored Graphs!!!',
-                "user_id" => $user_id,
-                "project_id" => $project->id,
-                "status" => 2,
-            ]);
+            admin_toastr('Parsed and Stored Graphs!', 'success', ['duration' => 5000]);
         } catch (\Exception $ex) {
             logger($ex);
         }

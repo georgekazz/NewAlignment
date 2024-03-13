@@ -7,7 +7,7 @@ use App\Models\SuggestionConfigurations\SilkConfiguration;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Project;
+use App\Models\Project;
 
 class ParseScores extends Job implements ShouldQueue
 {

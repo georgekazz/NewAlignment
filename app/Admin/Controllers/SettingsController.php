@@ -38,7 +38,7 @@ class SettingsController extends AdminController
 
         $input = array_filter($input);
         $settings = Settings::create($input);
-        // $settings->provider->validate($settings);
+        $settings->provider->validate($settings);
 
         admin_toastr('Settings Created!', 'success', ['duration' => 5000]);
 
@@ -66,12 +66,18 @@ class SettingsController extends AdminController
         $project = Project::find($project_id);
         $project->processed = 0;
         $project->save();
-        $provider = $project->settings ? $project->settings->provider : null;
-        $provider->prepare($project);
-        admin_toastr('SiLK Config File Created succesfully!', 'success', ['duration' => 5000]);
-        dispatch(new $provider->job($project, auth()->user()));
 
-        return redirect(admin_url('settings'));
+        $provider = $project->settings ? $project->settings->provider : null;
+
+        if ($provider) {
+            $provider->prepare($project);
+            admin_toastr('SiLK Config File Created successfully!', 'success', ['duration' => 5000]);
+            dispatch(new $provider->job($project, auth()->user()));
+        } else {
+            admin_toastr('No provider found for the project!', 'error', ['duration' => 5000]);
+        }
+
+        return redirect(admin_url('myprojects'));
     }
 
     public function updateDefault(Project $project)
