@@ -32,23 +32,14 @@ class Convert extends Job implements ShouldQueue
      */
     public function handle()
     {
-        \App\Notification::create([
-            "message" => 'Converting Graphs...' . $this->dump,
-            "user_id" => $this->user,
-            "project_id" => $this->project->id,
-            "status" => 2,
-        ]);
+        admin_toastr('Converting Graphs...', 'info', ['duration' => 5000]);
+
         // $controller = new \App\Http\Controllers\CreatelinksController();
         // $controller->D3_convert($this->project, $this->dump);
 
         if($this->dump === "target"){
-            \App\Notification::create([
-                "message" => 'Project Ready!',
-                "user_id" => $this->user,
-                "project_id" => $this->project->id,
-                "status" => 3,
-            ]);
 
+            admin_toastr('Project Ready!', 'success', ['duration' => 5000]);
             $this->project->processed = 1;
             $this->project->save();
         }

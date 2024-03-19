@@ -60,7 +60,7 @@ class SettingsController extends AdminController
             dd($silk->getNode($result, $node));
         }
     }
-
+ 
     public function create_config($project_id)
     {
         $project = Project::find($project_id);

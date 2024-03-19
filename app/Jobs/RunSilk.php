@@ -6,8 +6,8 @@ use App\Models\SuggestionConfigurations\SilkConfiguration;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Project;
-use App\User;
+use App\Models\Project;
+use App\Models\User;
 
 class RunSilk extends Job implements ShouldQueue
 {
@@ -18,8 +18,8 @@ class RunSilk extends Job implements ShouldQueue
      *
      * @return void
      */
-    protected $project,$user;
-    
+    protected $project, $user;
+
     public function __construct(Project $project, User $user)
     {
         $this->project = $project;
@@ -35,6 +35,6 @@ class RunSilk extends Job implements ShouldQueue
     {
         $score = new SilkConfiguration();
         $score->runSiLK($this->project, $this->user);
-        
+
     }
 }

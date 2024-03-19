@@ -148,7 +148,7 @@ class SilkConfiguration
         $name = $dataset["name"];
         $file = $this->filenameTemplate($filename);
         $format = $this->formatTemplate();
-        $graph = isset($dataset["value"][2]) ? $dataset["value"][2] : null;
+        $graph = isset ($dataset["value"][2]) ? $dataset["value"][2] : null;
         $attributes = $dataset["attributes"];
         return [
             "name" => $name,
