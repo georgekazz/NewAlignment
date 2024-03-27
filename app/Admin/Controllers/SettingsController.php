@@ -60,11 +60,12 @@ class SettingsController extends AdminController
             dd($silk->getNode($result, $node));
         }
     }
- 
+
     public function create_config($project_id)
     {
         $project = Project::find($project_id);
         $project->processed = 0;
+        $user = Auth::guard('admin')->user();
         $project->save();
 
         $provider = $project->settings ? $project->settings->provider : null;
@@ -72,7 +73,7 @@ class SettingsController extends AdminController
         if ($provider) {
             $provider->prepare($project);
             admin_toastr('SiLK Config File Created successfully!', 'success', ['duration' => 5000]);
-            dispatch(new $provider->job($project, auth()->user()));
+            dispatch(new $provider->job($project, $user));
         } else {
             admin_toastr('No provider found for the project!', 'error', ['duration' => 5000]);
         }

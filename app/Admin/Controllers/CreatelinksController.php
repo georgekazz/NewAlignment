@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Admin\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use OpenAdmin\Admin\Controllers\AdminController;
@@ -14,9 +15,11 @@ use DB;
 
 class CreatelinksController extends AdminController
 {
-    public function grid(Project $project)
+    protected $title = 'Create Links';
+    public function grid()
     {
         session_start();
+        $project = Project::find(Project::max('id'));
         $this->cacheOntologies();
         $nameSource = implode("_", ["project", $project->id, "source", $project->source->id, '']);
         $nameTarget = implode("_", ["project", $project->id, "target", $project->target->id, '']);
@@ -81,6 +84,15 @@ class CreatelinksController extends AdminController
         return $result;
     }
 
+    public static function mergeGraphs(Graph $graph1, Graph $graph2)
+    {
+        $data1 = $graph1->toRdfPhp();
+        $data2 = $graph2->toRdfPhp();
+        $merged = array_merge_recursive($data1, $data2);
+        unset($data1, $data2);
+        return new Graph('urn:easyrdf:merged', $merged, 'php');
+    }
+
     public function short_infobox(Request $request)
     {
         $project = Project::find($request->project_id);
@@ -121,7 +133,7 @@ class CreatelinksController extends AdminController
 
     public function getGroups()
     {
-        $user = auth()->user();
+        $user = Auth::guard('admin')->user();
         $select = DB::table('link_types')->select('group as option')
             ->where('public', '=', 'true')
             ->orWhere('user_id', '=', $user)

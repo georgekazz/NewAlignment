@@ -25,12 +25,14 @@ class SilkConfiguration
 
         //copy source ontology
         $suffix1 = ($project->source->filetype != 'ntriples') ? '.nt' : '';
-        $source = file_get_contents($project->source->resource->path() . $suffix1);
+        $filePath = 'file:///' . storage_path('app/' . $project->source->resource);
+        $source = file_get_contents($filePath . $suffix1);
         Storage::disk("projects")->put("/project" . $project->id . "/source.nt", $source);
 
         //copy target ontology
         $suffix2 = ($project->target->filetype != 'ntriples') ? '.nt' : '';
-        $target = file_get_contents($project->target->resource->path() . $suffix2);
+        $filePath2 = 'file:///' . storage_path('app/' . $project->source->resource);
+        $target = file_get_contents($filePath2 . $suffix2);
         Storage::disk("projects")->put("/project" . $project->id . "/target.nt", $target);
         //create the config
         $newConfig = $this->reconstruct($project->settings->id);
@@ -42,7 +44,8 @@ class SilkConfiguration
     public function reconstruct($id)
     {
         $settings = Settings::find($id);
-        $settings_xml = file_get_contents($settings->resource->path());
+        $filePath = 'file:///' . storage_path('app/uploads/project2_config.xml' . $settings->resource);
+        $settings_xml = file_get_contents($filePath);
         $new = $this->parseXML($settings_xml);
 
         $prefixes = $this->getNode($new, $this->nodes[0]);
@@ -177,11 +180,18 @@ class SilkConfiguration
 
     public function validateSettingsFile(Settings $settings)
     {
-
         libxml_use_internal_errors(true);
-        $schema = $this->validateSchema($settings->resource->path());
-        admin_toastr('An error occurred!', 'error', ['duration' => 5000]);
-        return $schema;
+        $filePath = 'file:///' . storage_path('app/' . $settings->resource);
+
+        try {
+            $contents = file_get_contents($filePath);
+            $schema = $this->validateSchema($contents);
+            dd($schema);
+        } catch (\Exception $e) {
+            // Αντιμετωπίστε το σφάλμα εδώ
+            admin_toastr('An error occurred!', 'error', ['duration' => 5000]);
+            return null;
+        }
     }
 
     public function validateXML($xml)
@@ -191,7 +201,8 @@ class SilkConfiguration
 
     public function validateAlignment(Settings $settings)
     {
-        $xml = file_get_contents($settings->resource->path());
+        $filePath = 'file://' . storage_path('app/' . $settings->resource);
+        $xml = file_get_contents($filePath);
         $parsed = $this->parseXML($xml);
         $linkage = $this->getNode($parsed, $this->nodes[2]);
         $source = $linkage[2]["value"][0]["value"][0]["attributes"]["dataSource"];

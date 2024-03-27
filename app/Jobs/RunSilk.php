@@ -8,9 +8,12 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Foundation\Bus\Dispatchable;
 
-class RunSilk extends Job implements ShouldQueue
+
+class RunSilk
 {
+    use Dispatchable;
     use InteractsWithQueue, SerializesModels;
 
     /**
@@ -20,7 +23,7 @@ class RunSilk extends Job implements ShouldQueue
      */
     protected $project, $user;
 
-    public function __construct(Project $project, User $user)
+    public function __construct(Project $project, \OpenAdmin\Admin\Auth\Database\Administrator  $user)
     {
         $this->project = $project;
         $this->user = $user->id;

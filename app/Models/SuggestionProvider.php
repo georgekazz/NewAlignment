@@ -14,8 +14,8 @@ class SuggestionProvider extends Model
     public function validate(Settings $settings)
     {
         $configuration = new $this->configuration();
-        dd($configuration);
-        $settings->valid = json_decode($configuration->validateSettingsFile($settings)->bag)->valid;
+        // dd($configuration);
+        // $settings->valid = json_decode($configuration->validateSettingsFile($settings)->bag)->valid;
         $settings->save();
     }
 

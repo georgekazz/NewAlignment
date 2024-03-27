@@ -8,9 +8,11 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\Project;
+use Illuminate\Foundation\Bus\Dispatchable;
 
-class ParseScores extends Job implements ShouldQueue
+class ParseScores 
 {
+    use Dispatchable;
     use InteractsWithQueue, SerializesModels;
 
     protected $project,$user;

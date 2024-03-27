@@ -30,6 +30,7 @@ class Settings extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
+
     public function provider()
     {
         return $this->belongsTo("\App\Models\SuggestionProvider", "suggestion_provider_id");
