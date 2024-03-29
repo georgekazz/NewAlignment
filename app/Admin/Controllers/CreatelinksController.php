@@ -12,9 +12,11 @@ use OpenAdmin\Admin\Controllers\AdminController;
 use EasyRdf\Graph;
 use App\Models\File;
 use DB;
+use App\Models\RDFTrait;
 
 class CreatelinksController extends AdminController
 {
+    use RDFTrait;
     protected $title = 'Create Links';
     public function grid()
     {
@@ -61,12 +63,16 @@ class CreatelinksController extends AdminController
 
     public function json_serializer($file)
     {
-        try {
-            $jsonfile = Storage::disk('public')->get('json_serializer/' . $file);
-        } catch (\Exception $ex) {
+        if (Storage::disk('public')->exists('json_serializer/' . $file)) {
+            
+            $jsonfile = Storage::disk('public')->json('json_serializer/' . $file);
+
+        } else {
+
             $newfile = explode("_", explode(".", $file)[0]);
             $this->D3_convert(Project::find($newfile[1]), $newfile[2], $newfile[4]);
-            $jsonfile = Storage::disk('public')->get('json_serializer/' . $file);
+            $jsonfile = Storage::disk('public')->json('json_serializer/' . $file);
+
         }
         return (new Response($jsonfile, 200))
             ->header('Content-Type', 'application/json');
@@ -147,7 +153,7 @@ class CreatelinksController extends AdminController
         try {
             $graph = new Graph;
             $suffix = ($file->filetype != 'ntriples') ? '.nt' : '';
-            $graph->parseFile($file->resource->path() . $suffix, 'ntriples');
+            $graph->parseFile(storage_path('app/' . $file->resource . $suffix), 'ntriples');
             Cache::forever($file->id . "_graph", $graph);
             return $graph;
         } catch (\Exception $ex) {
@@ -157,7 +163,6 @@ class CreatelinksController extends AdminController
 
     public function D3_convert(Project $project, $dump, $orderBy = null)
     {
-
         $file = $project->$dump;
         /*
          * Read the graph
@@ -184,7 +189,7 @@ class CreatelinksController extends AdminController
             $name = $this->label($graph, $parent);
             $JSON['name'] = "$name";
             $JSON['url'] = urlencode($parent);
-            $children = $this->find_children($graph, $firstLevelPath, $parent, $score, $JSON);
+            $children = $this->find_children($graph, $firstLevelPath, $parent, $orderBy, $score);
             $JSON['children'] = $orderBy === null ? $children : collect($children)->sortBy($orderBy)->values()->toArray();
         }
 
@@ -199,7 +204,7 @@ class CreatelinksController extends AdminController
 
     function find_children(Graph $graph, $hierarchic_link, $parent_url, $orderBy = null, $score = null)
     {
-
+        var_dump($score);
         $children = $graph->allResources($parent_url, $hierarchic_link);
         $counter = 0;
         $myJSON = [];
@@ -208,7 +213,7 @@ class CreatelinksController extends AdminController
         foreach ($children as $child) {
             $name = $this->label($graph, $child);
             $myJSON[]["name"] = "$name";
-            if ($score !== null) {
+            if ($score !== null && $score instanceof Graph) {
                 $suggestions = count($score->resourcesMatching("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity1", $child));
             } else {
                 $suggestions = 0;
@@ -216,9 +221,9 @@ class CreatelinksController extends AdminController
 
             $myJSON[$counter]['suggestions'] = $suggestions;
             $myJSON[$counter]['url'] = urlencode($child);
-            $children = $this->find_children($graph, $link, $children, $score, $myJSON);
+            $children = $this->find_children($graph, $link, $child, $orderBy, $score);
             if (sizeOf($children) == 0) {
-                $children = $this->find_children($graph, $inverseLink, $child, $score, $myJSON);
+                $children = $this->find_children($graph, $inverseLink, $child, $orderBy, $score);
             }
 
             $myJSON[$counter]['children'] = $orderBy === null ? $children : collect($children)->sortBy($orderBy)->values()->toArray();

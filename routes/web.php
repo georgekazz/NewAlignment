@@ -45,10 +45,9 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/myprojects', 'App\Admin\Controllers\ProjectController@create') -> name('myprojects.create');
 
     Route::get('/createlinks/{project?}', [CreatelinksController::class, 'index']) -> name('createlinks');
-    Route::post('createlinks/utility/create', 'App\Admin\Controllers\LinkController@create') -> name('mylinks.create');
-    Route::get('createlinks/json_serializer/{file}', 'App\Admin\Controllers\CreatelinksController@json_serializer')-> name('createlinks.json');
-    Route::post('createlinks/utility/infobox', 'App\Admin\Controllers\CreatelinksController@short_infobox')-> name('createlinks.infobox');
-    Route::post('createlinks/utility/comparison/{project?}', 'App\Admin\Controllers\CreatelinksController@comparison')-> name('createlinks.comparison');
-    Route::get('createlinks/utility/connected', 'App\Admin\Controllers\LinkController@connected') -> name ('mylinks.connected');
-
+    Route::post('/createlinks/utility/create', 'App\Admin\Controllers\LinkController@create') -> name('mylinks.create');
+    Route::get('/createlinks/json_serializer/{file}', 'App\Admin\Controllers\CreatelinksController@json_serializer')-> name('createlinks.json');
+    Route::post('/createlinks/utility/infobox', 'App\Admin\Controllers\CreatelinksController@short_infobox')-> name('createlinks.infobox');
+    Route::post('/createlinks/utility/comparison/{project?}', 'App\Admin\Controllers\CreatelinksController@comparison')-> name('createlinks.comparison');
+    Route::get('/createlinks/utility/connected', 'App\Admin\Controllers\LinkController@connected') -> name ('mylinks.connected');
 });

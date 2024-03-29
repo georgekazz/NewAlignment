@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cookie;
 use EasyRdf\RdfNamespace;
 use EasyRdf\Graph;
 
-class RDFTrait extends Model
+trait RDFTrait
 {
     use HasFactory;
 
