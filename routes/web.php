@@ -50,4 +50,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/createlinks/utility/infobox', 'App\Admin\Controllers\CreatelinksController@short_infobox')-> name('createlinks.infobox');
     Route::post('/createlinks/utility/comparison/{project?}', 'App\Admin\Controllers\CreatelinksController@comparison')-> name('createlinks.comparison');
     Route::get('/createlinks/utility/connected', 'App\Admin\Controllers\LinkController@connected') -> name ('mylinks.connected');
+
+    Route::post('/linktype/update', 'App\Admin\Controllers\LinkTypeController@updateForm') -> name('linktypes.update');
+    Route::get('link/ajax', 'App\Admin\Controllers\LinkController@ajax')->name('links.ajax');
 });

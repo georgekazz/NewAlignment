@@ -1,3 +1,8 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/iCheck/1.0.2/skins/all.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/iCheck/1.0.2/icheck.min.js"></script>
+
 <script>
     $(function () {
         $('#suggestions-box').slimScroll({
@@ -7,19 +12,26 @@
 </script>
 <script>
 $(document).ready(function(){
-    $("#radio").load(
-            "{{URL::to("/")}}/linktype/update",
-    { "group" : "SKOS" ,
-    }, function(){
-        $('input').iCheck({
-            checkboxClass: 'icheckbox_polaris',
-            radioClass: 'iradio_polaris',
-            increaseArea: '-10%' // optional
-        });
-    }
-            );
-    updateLinksTable()
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
     });
+
+    $("#radio").load(
+        "{{URL::to("/")}}/linktype/update",
+        { "group" : "SKOS" },
+        function(){
+            $('input').iCheck({
+                checkboxClass: 'icheckbox_polaris',
+                radioClass: 'iradio_polaris',
+                increaseArea: '-10%' // optional
+            });
+        }
+    );
+
+    updateLinksTable();
+});
 
 function updateLinksTable(){
     $("#select-project-form").hide();
@@ -125,7 +137,6 @@ $("#searchName").on("select2-selecting", function(e) {
     searchText = e.object.text;
     graph = "#source";
     searchTree(root);        
-    //console.log(e);
     root.children.forEach(collapseAllNotFound);
     $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>'); 
     $("#source_info").load("utility/infobox",{"uri":e.object.url,'dump':"source", "project_id":{{$project->id}}});

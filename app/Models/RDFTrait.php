@@ -49,44 +49,27 @@ trait RDFTrait
 
     public static function label(Graph $graph, $uri)
     {
-        $label_properties =
-            \App\Models\LabelExtractor::where('enabled', '=', '1')
-                ->orderBy('priority', 'asc')
-                ->get();
+        $labelProperties = [
+            'http://www.w3.org/2000/01/rdf-schema#label',
+            'http://www.w3.org/2004/02/skos/core#prefLabel',
+            'http://purl.org/dc/terms/title'
+        ];
+
         $label = null;
         $locale = Cookie::get('locale');
-        foreach ($label_properties as $property) {
-            if ($label == null) {
-                $label = $graph
-                    ->getLiteral(
-                        $uri,
-                        new \EasyRdf\Resource($property->property),
-                        $locale
-                    );
-            } else {
+
+        foreach ($labelProperties as $property) {
+            $label = $graph->getLiteral($uri, new \EasyRdf\Resource($property), $locale)
+                ?? $graph->getLiteral($uri, new \EasyRdf\Resource($property), 'en')
+                ?? $graph->getLiteral($uri, new \EasyRdf\Resource($property));
+
+            if ($label !== null) {
                 break;
             }
-            if ($label == null) {
-                //get default label in English. This should be configurable on .env
-                $label = $graph
-                    ->getLiteral(
-                        $uri,
-                        new \EasyRdf\Resource($property->property),
-                        'en'
-                    );
-            }
-            if ($label == null) {
-                //if no english label found try a label in any language
-                $label = $graph
-                    ->getLiteral(
-                        $uri,
-                        new \EasyRdf\Resource($property->property)
-                    );
-            }
         }
-        if ($label == null) {
-            $label = RdfNamespace::shorten($uri, true);
-        }
+
+        $label = $label ?? RdfNamespace::shorten($uri, true);
+
         return $label;
     }
 }

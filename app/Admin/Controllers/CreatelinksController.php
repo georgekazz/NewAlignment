@@ -64,7 +64,7 @@ class CreatelinksController extends AdminController
     public function json_serializer($file)
     {
         if (Storage::disk('public')->exists('json_serializer/' . $file)) {
-            
+
             $jsonfile = Storage::disk('public')->json('json_serializer/' . $file);
 
         } else {
@@ -204,7 +204,6 @@ class CreatelinksController extends AdminController
 
     function find_children(Graph $graph, $hierarchic_link, $parent_url, $orderBy = null, $score = null)
     {
-        var_dump($score);
         $children = $graph->allResources($parent_url, $hierarchic_link);
         $counter = 0;
         $myJSON = [];
