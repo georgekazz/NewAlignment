@@ -47,18 +47,9 @@ class Link extends Model
         return $this->hasMany('App\Comment');
     }
 
-    // public function myVote(){
-    //     try{
-    //         $vote = \App\Models\Vote::where("user_id", "=", auth()->user()->id)->where("link_id", "=", $this->id)->firstOrFail();
-    //     }
-    //     catch (ModelNotFoundException $ex){
-    //         $vote = null;
-    //     }
-    //     return $vote;
-    // }
-
     public function humanize()
     {
+        logger("humanize");
         $project = \App\Models\Project::find($this->attributes["project_id"]);
         $file = new FileController();
         $file->cacheGraph(\App\Models\File::find($project->source_id));
@@ -72,8 +63,8 @@ class Link extends Model
         $this->target_label = $target_label;
         $link_label = \App\Models\RDFTrait::label($ontologies_graph, $this->link_type) ?: RdfNamespace::shorten($this->link_type, true);
         $this->link_label = $link_label;
-        $vote = $this->myVote();
-        $this->myvote = $vote != null ? $vote->vote : null;
+        // $vote = $this->myVote();
+        // $this->myvote = $vote != null ? $vote->vote : null;
         return $this;
     }
 }

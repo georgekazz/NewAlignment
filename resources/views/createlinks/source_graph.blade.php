@@ -1,14 +1,8 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <script>
-function select2DataCollectName(d) {
-    if (d.children)
-        d.children.forEach(select2DataCollectName);
-    else if (d._children)
-        d._children.forEach(select2DataCollectName);
-    select2Data.push({"name": d.name , "url": d.url});
-}
 
 function select2DataCollectName2(d) {
     if (d.children)
@@ -22,6 +16,10 @@ window.onload = function start(){
     check_connectivity();
     check_connectivity_right();
 }
+</script>
+
+
+<script>
 
 var margin = {top: 30, right: 20, bottom: 30, left: 100},
     width = 960 - margin.left - margin.right,
@@ -29,10 +27,9 @@ var margin = {top: 30, right: 20, bottom: 30, left: 100},
     barWidth = width * .3;
 
 var i = 0,
-    duration = 400,
-    root;
+    duration = 400;
 
-var tree = d3.tree().nodeSize([0, 20]);
+var tree = d3.tree();
     
 var diagonal = d3.linkVertical()
     .x(function(d) { return d.y; })
@@ -52,6 +49,20 @@ d3.select("svg").append("clipPath")
     .attr("y",-10)
     .attr("width",barWidth+"px")
     .attr("height",barHeight+"px");
+
+function toggleAll(d) {
+    if (d.children) {
+        d.children.forEach(toggleAll);
+        toggle(d);
+    }
+}
+
+function closeAll(d) {
+    if (d.children) {
+        d.children.forEach(closeAll);
+        toggle(d);
+    }
+}
   
 $(document).ready(function(){
     source_graph("{{$_SESSION["source_json"]}}");
@@ -60,66 +71,48 @@ $(document).ready(function(){
 
 // Update the source_graph function
 function source_graph(file) {
-    fetch(file)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(flare => {
+    console.log("ffff", file);
+    d3.json(file)
+        .then(function(flare) {
+            root = d3.hierarchy(flare);
             flare.x0 = 0;
             flare.y0 = 0;
-            function toggleAll(d) {
-                if (d.children) {
-                    d.children.forEach(toggleAll);
-                    toggle(d);
-                }
-            }
 
-            function closeAll(d) {
-                if (d.children) {
-                    d.children.forEach(closeAll);
-                    toggle(d);
-                }
-            }
-            
-            update(root = flare);
+            // Update the root with the newly loaded data
+            tree(root);
+            update(root);
+
+            // Close all nodes initially
             root.children.forEach(closeAll);
-            update(root = flare);
+            update(root);
 
+            // Populate select2 data
             select2Data = [];
             select2DataCollectName(root);
             select2DataObject = [];
-            select2Data.sort(function(a, b) {
-                if (a > b) return 1; // Ταξινόμηση
-                if (a < b) return -1;
-                return 0;
-            })
-                .filter(function(item, i, ar) {
-                    return ar.indexOf(item) === i;
-                }) // Αφαιρεση διπλά στοιχεία
-                .filter(function(item, i, ar) {
-                    select2DataObject.push({
-                        "id": i,
-                        "text": item.name,
-                        "url" : item.url
-                    });
-                    //console.log(item);
+            select2Data.forEach(function(item, i) {
+                select2DataObject.push({
+                    "id": i,
+                    "text": item.name,
+                    "url": item.url
                 });
-            //console.log(select2Data);
+            });
+
+            // Initialize select2
             $("#searchName").select2({
                 data: select2DataObject,
                 minimumInputLength: 3,
                 containerCssClass: "search",
                 placeholder: "search a source element",
-                allowClear:true
+                allowClear: true
             });
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
+
 
 function toggle(d) {
     if (d.children) {
@@ -131,116 +124,108 @@ function toggle(d) {
     }
 }
 
+function select2DataCollectName(d) {
+    console.log("eeee", $d);
+    if (d.children)
+        d.children.forEach(select2DataCollectName);
+    else if (d._children)
+        d._children.forEach(select2DataCollectName);
+    select2Data.push({"name": d.name , "url": d.url});
+}
+
 function update(source) {
-    var treeData = d3.tree();
-    var nodes = treeData(root).nodes(root);
-    
+    console.log("inside update function");
+
+    // Layout the tree
+    var treeData = tree(root);
+    var nodes = root.descendants();
+    var links = root.links();
+
     var height = Math.max(500, nodes.length * barHeight + margin.top + margin.bottom);
 
-d3.select("svg").transition()
-    .duration(duration)
-    .attr("height", height);
+    d3.select("svg").transition()
+        .duration(duration)
+        .attr("height", height);
 
-d3.select(self.frameElement).transition()
-    .duration(duration)
-    .style("height", height + "px");
+    d3.select(self.frameElement).transition()
+        .duration(duration)
+        .style("height", height + "px");
 
-// Compute the "layout".
-nodes.forEach(function(n, i) {
-  n.x = i * barHeight;   
-});
+    nodes.forEach(function(n, i) {
+        n.x = i * barHeight;
+    });
 
-// Update the nodes…
-var node = svg.selectAll("g.node")
-    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+    var node = svg.selectAll("g.node")
+        .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
-var nodeEnter = node.enter().append("g")
-    .attr("class", "node source_node")
-    .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    .style("opacity", 1e-6);
+    var nodeEnter = node.enter().append("g")
+        .attr("class", "node source_node")
+        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+        .style("opacity", 1e-6);
 
-// Enter any new nodes at the parent's previous position.
-nodeEnter.append("rect")
-    .attr("y", -barHeight / 2)
-    .attr("height", barHeight)
-    .attr("width", barWidth)
-    .style("fill", color)
-    .on("click", click);
-//indicator node  
-nodeEnter.append("circle")
-    .attr("cy", 0)
-    .attr("cx", -15)
-    .attr("r", 6)
-    .attr("class", indicator)
-    .style("fill", indicatorColor)
-    .style("stroke", "black")
-    .style("stroke-width", 1)
-    .on("click", click);
+    nodeEnter.append("rect")
+        .attr("y", -barHeight / 2)
+        .attr("height", barHeight)
+        .attr("width", barWidth)
+        .style("fill", color)
+        .on("click", click);
 
-nodeEnter.append("text")
-    .attr("dy", 3.5)
-    .attr("dx", 5.5)
-    .attr("clip-path","url(#clip_path1)")      
-    .text(function(d) { return d.name; });
-    
-nodeEnter.append("url")
-     .text(function(d) { return d.url; });
-  
-// Transition nodes to their new position.
-nodeEnter.transition()
-    .duration(duration)
-    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-    .style("opacity", 1);
+    nodeEnter.append("circle")
+        .attr("cy", 0)
+        .attr("cx", -15)
+        .attr("r", 6)
+        .attr("class", indicator)
+        .style("fill", indicatorColor)
+        .style("stroke", "black")
+        .style("stroke-width", 1)
+        .on("click", click);
 
-node.transition()
-    .duration(duration)
-    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-    .style("opacity", 1)
-  .select("rect")
-    .style("fill", color);
+    nodeEnter.append("text")
+        .attr("dy", 3.5)
+        .attr("dx", 5.5)
+        .attr("clip-path", "url(#clip_path1)")
+        .text(function(d) { return d.data.name; });
 
-// Transition exiting nodes to the parent's new position.
-node.exit().transition()
-    .duration(duration)
-    .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-    .style("opacity", 1e-6)
-    .remove();
-// Stash the old positions for transition.
-nodes.forEach(function(d) {
-  d.x0 = d.x;
-  d.y0 = d.y;
-  if(d.class === "found"){
-      $("#source").slimScroll({scrollTo: d.x + 'px'});
-  }
-});
+    nodeEnter.append("url")
+        .text(function(d) { return d.data.url; });
 
-var panZoomTarget = svgPanZoom('#left',{
-    fit: false,
-    zoomScaleSensitivity: 0.1,
-    contain: false,
-    center: false,
-    minZoom: 0.7,
-    mouseWheelZoomEnabled: false
-  });
-  document.getElementById('zoom-in-source').addEventListener('click', function(ev){
-        ev.preventDefault()
+    nodeEnter.transition()
+        .duration(duration)
+        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+        .style("opacity", 1);
 
-        panZoomTarget.zoomIn()
-      });
+    node.transition()
+        .duration(duration)
+        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+        .style("opacity", 1)
+        .select("rect")
+        .style("fill", color);
 
-      document.getElementById('zoom-out-source').addEventListener('click', function(ev){
-        ev.preventDefault()
+    node.exit().transition()
+        .duration(duration)
+        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+        .style("opacity", 1e-6)
+        .remove();
 
-        panZoomTarget.zoomOut()
-      });
+    nodes.forEach(function(d) {
+        d.x0 = d.x;
+        d.y0 = d.y;
+        if (d.data.class === "found") {
+            $("#source").slimScroll({ scrollTo: d.x + 'px' });
+        }
+    });
 
-      document.getElementById('reset-source').addEventListener('click', function(ev){
-        ev.preventDefault()
-
-        panZoomTarget.resetZoom(),
-        panZoomTarget.resetPan()
-      });
+    const panZoomTarget = svgPanZoom('#left', {
+        fit: false,
+        zoomScaleSensitivity: 0.1,
+        contain: false,
+        center: false,
+        minZoom: 0.7,
+        mouseWheelZoomEnabled: false
+    });
 }
+
+
 
 // Toggle children on click.
 function click(d) {
@@ -263,14 +248,15 @@ function click(d) {
 }
 
 function check_connectivity(){
+    
     var nodes = $(".source_node")
     $.ajax({
         type: "GET",
         url: "utility/connected",
         data: {project_id : {{$project->id}}, type : "source"},
         success: function(data){
+            console.log("Connect",data);
             var connected = JSON.parse(data);
-            console.log(data);
             $.each(nodes, function(i, n) {
                 var flag = false;
                 connected.forEach(function(e, j){

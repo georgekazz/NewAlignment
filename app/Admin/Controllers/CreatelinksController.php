@@ -209,23 +209,26 @@ class CreatelinksController extends AdminController
         $myJSON = [];
         $link = "skos:narrower";
         $inverseLink = "^skos:broader";
+        
         foreach ($children as $child) {
             $name = $this->label($graph, $child);
-            $myJSON[]["name"] = "$name";
+            $suggestions = 0;
+    
             if ($score !== null && $score instanceof Graph) {
                 $suggestions = count($score->resourcesMatching("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity1", $child));
-            } else {
-                $suggestions = 0;
             }
-
+    
+            $myJSON[$counter]['name'] = $name;
             $myJSON[$counter]['suggestions'] = $suggestions;
             $myJSON[$counter]['url'] = urlencode($child);
-            $children = $this->find_children($graph, $link, $child, $orderBy, $score);
-            if (sizeOf($children) == 0) {
-                $children = $this->find_children($graph, $inverseLink, $child, $orderBy, $score);
+    
+            $child_children = $this->find_children($graph, $link, $child, $orderBy, $score);
+    
+            if (empty($child_children)) {
+                $child_children = $this->find_children($graph, $inverseLink, $child, $orderBy, $score);
             }
-
-            $myJSON[$counter]['children'] = $orderBy === null ? $children : collect($children)->sortBy($orderBy)->values()->toArray();
+    
+            $myJSON[$counter]['children'] = $orderBy === null ? $child_children : collect($child_children)->sortBy($orderBy)->values()->toArray();
             $counter++;
         }
         return $myJSON;

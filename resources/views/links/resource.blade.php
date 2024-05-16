@@ -5,5 +5,5 @@
    data-animations="true"
    title="{{$resource}}"
    >
-   {{ \App\RDFTrait::label($graph, $resource)?:\EasyRdf_Namespace::shorten($resource, true)}}
+   {{ \App\Models\RDFTrait::label($graph, $resource)?:\EasyRdf_Namespace::shorten($resource, true)}}
 </a>

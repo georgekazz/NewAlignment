@@ -42,7 +42,7 @@
   cursor: pointer;
   fill: #fff;
   fill-opacity: .5;
-  stroke: #3182bd;
+  stroke: #001e35;
   stroke-width: 1.5px;
 }
 
@@ -53,6 +53,6 @@
 
 path.link {
   fill: none;
-  stroke: #9ecae1;
+  stroke: #37a4df;
   stroke-width: 1.5px;
 }

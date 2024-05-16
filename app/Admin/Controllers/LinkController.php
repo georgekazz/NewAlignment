@@ -58,7 +58,8 @@ class LinkController extends AdminController
         $connected = array();
         $entity = $type . '_entity';
         foreach ($links as $link) {
-            $connected[] = $link->$entity;
+            logger("mpainei");
+            array_push($connected, $link->$entity);
         }
         $connected = array_values(array_unique($connected, SORT_REGULAR));
         return json_encode($connected);

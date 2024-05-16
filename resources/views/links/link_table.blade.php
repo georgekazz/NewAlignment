@@ -18,9 +18,9 @@
                     
                 ?>
                 <?php 
-                    $prefixes = App\Prefix::all(); 
+                    $prefixes = App\Models\Prefix::all(); 
                     foreach($prefixes as $prefix){
-                      EasyRdf_Namespace::set($prefix->prefix, $prefix->namespace);
+                      EasyRdf\RdfNamespace::set($prefix->prefix, $prefix->namespace);
                     }
                 ?>
                 @foreach ($links as $link)
