@@ -3,13 +3,20 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <script>
-
 function select2DataCollectName2(d) {
     if (d.children)
         d.children.forEach(select2DataCollectName2);
     else if (d._children)
         d._children.forEach(select2DataCollectName2);
-    select2Data2.push({"name": d.name , "url": d.url});
+    select2Data2.push({"name": d.data.name , "url": d.data.url});
+}
+
+function select2DataCollectName(d) {
+    if (d.children)
+        d.children.forEach(select2DataCollectName);
+    else if (d._children)
+        d._children.forEach(select2DataCollectName);
+    select2Data.push({"name": d.data.name , "url": d.data.url});
 }
 
 window.onload = function start(){
@@ -18,9 +25,7 @@ window.onload = function start(){
 }
 </script>
 
-
 <script>
-
 var margin = {top: 30, right: 20, bottom: 30, left: 100},
     width = 960 - margin.left - margin.right,
     barHeight = 20,
@@ -30,18 +35,18 @@ var i = 0,
     duration = 400;
 
 var tree = d3.tree();
-    
+
 var diagonal = d3.linkVertical()
     .x(function(d) { return d.y; })
     .y(function(d) { return d.x; });
 
-    var svg = d3.select("div#source").append("svg")
+var svg = d3.select("div#source").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr('id', 'left')
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-//add clippath
+// add clippath
 d3.select("svg").append("clipPath")
     .attr("id","clip_path1")
     .append("rect")
@@ -50,55 +55,64 @@ d3.select("svg").append("clipPath")
     .attr("width",barWidth+"px")
     .attr("height",barHeight+"px");
 
-function toggleAll(d) {
+function toggle(d) {
     if (d.children) {
-        d.children.forEach(toggleAll);
-        toggle(d);
+        d._children = d.children;
+        d.children = null;
+    } else {
+        d.children = d._children;
+        d._children = null;
     }
 }
 
-function closeAll(d) {
-    if (d.children) {
-        d.children.forEach(closeAll);
-        toggle(d);
-    }
-}
-  
 $(document).ready(function(){
-    source_graph("{{$_SESSION["source_json"]}}");
-    target_graph("{{$_SESSION["target_json"]}}");
+    source_graph("{{$_SESSION['source_json']}}");
+    target_graph("{{$_SESSION['target_json']}}");
 });
 
-// Update the source_graph function
 function source_graph(file) {
-    console.log("ffff", file);
+    console.log("file:", file);
     d3.json(file)
         .then(function(flare) {
             root = d3.hierarchy(flare);
-            flare.x0 = 0;
-            flare.y0 = 0;
+            root.x0 = 0;
+            root.y0 = 0;
 
-            // Update the root with the newly loaded data
+            function toggleAll(d) {
+                if (d.children) {
+                    d.children.forEach(toggleAll);
+                    toggle(d);
+                }
+            }
+
+            function closeAll(d) {
+                if (d.children) {
+                    d.children.forEach(closeAll);
+                    toggle(d);
+                }
+            }
+
             tree(root);
-            update(root);
-
-            // Close all nodes initially
             root.children.forEach(closeAll);
             update(root);
 
-            // Populate select2 data
             select2Data = [];
             select2DataCollectName(root);
-            select2DataObject = [];
-            select2Data.forEach(function(item, i) {
-                select2DataObject.push({
-                    "id": i,
-                    "text": item.name,
-                    "url": item.url
+            select2DataObject = select2Data
+                .sort(function(a, b) {
+                    return a.name.localeCompare(b.name);
+                })
+                .filter(function(item, i, ar) {
+                    return ar.indexOf(item) === i;
+                })
+                .map(function(item, i) {
+                    return {
+                        "id": i,
+                        "text": item.name,
+                        "url": item.url || "No URL"
+                    };
                 });
-            });
 
-            // Initialize select2
             $("#searchName").select2({
                 data: select2DataObject,
                 minimumInputLength: 3,
@@ -112,31 +126,14 @@ function source_graph(file) {
         });
 }
 
-
-
-function toggle(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    } else {
-        d.children = d._children;
-        d._children = null;
-    }
-}
-
-function select2DataCollectName(d) {
-    console.log("eeee", $d);
-    if (d.children)
-        d.children.forEach(select2DataCollectName);
-    else if (d._children)
-        d._children.forEach(select2DataCollectName);
-    select2Data.push({"name": d.name , "url": d.url});
-}
-
 function update(source) {
     console.log("inside update function");
 
-    // Layout the tree
+    if (source) {
+        source.x0 = source.x0 || 0;
+        source.y0 = source.y0 || 0;
+    }
+
     var treeData = tree(root);
     var nodes = root.descendants();
     var links = root.links();
@@ -160,7 +157,9 @@ function update(source) {
 
     var nodeEnter = node.enter().append("g")
         .attr("class", "node source_node")
-        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+        .attr("transform", function(d) { 
+            return "translate(" + (source.y0 || 0) + "," + (source.x0 || 0) + ")"; 
+        })
         .style("opacity", 1e-6);
 
     nodeEnter.append("rect")
@@ -187,7 +186,7 @@ function update(source) {
         .text(function(d) { return d.data.name; });
 
     nodeEnter.append("url")
-        .text(function(d) { return d.data.url; });
+        .text(function(d) { return d.data.url || ""; });
 
     nodeEnter.transition()
         .duration(duration)
@@ -203,7 +202,7 @@ function update(source) {
 
     node.exit().transition()
         .duration(duration)
-        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+        .attr("transform", function(d) { return "translate(" + (source.y || 0) + "," + (source.x || 0) + ")"; })
         .style("opacity", 1e-6)
         .remove();
 
@@ -215,21 +214,17 @@ function update(source) {
         }
     });
 
-    const panZoomTarget = svgPanZoom('#left', {
-        fit: false,
-        zoomScaleSensitivity: 0.1,
-        contain: false,
-        center: false,
-        minZoom: 0.7,
-        mouseWheelZoomEnabled: false
-    });
+    // const panZoomTarget = svgPanZoom('#left', {
+    //     fit: false,
+    //     zoomScaleSensitivity: 0.1,
+    //     contain: false,
+    //     center: false,
+    //     minZoom: 0.7,
+    //     mouseWheelZoomEnabled: false
+    // });
 }
 
-
-
-// Toggle children on click.
-function click(d) {
-    // children finder
+function click(event, d) {
     if (d.children) {
         d._children = d.children;
         d.children = null;
@@ -239,23 +234,25 @@ function click(d) {
     }
     clearAll(root);
     d.class = "found";
-    //infobox update
-    $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>');
-    var collapsed = $("#source_info").hasClass("collapsed-box");
-    $("#source_info").load("utility/infobox",{"uri":d.url,'dump':"source", "collapsed":collapsed, "project_id":{{$project->id}}});
-    $("#comparison").load("utility/comparison/{{$project->id}}",{"url":d.url});
+
+    if (d.data.url && d.data.url.trim() !== "") {
+        $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>');
+        var collapsed = $("#source_info").hasClass("collapsed-box");
+        $("#source_info").load("utility/infobox", {"uri": d.data.url, 'dump': "source", "collapsed": collapsed, "project_id": {{$project->id}}});
+        $("#comparison").load("utility/comparison/{{$project->id}}", {"url": d.data.url});
+    } else {
+        console.error("Invalid or empty URI:", d.data.url);
+    }
     update(d);
 }
-
-function check_connectivity(){
-    
+function check_connectivity() {
     var nodes = $(".source_node")
     $.ajax({
         type: "GET",
         url: "utility/connected",
         data: {project_id : {{$project->id}}, type : "source"},
         success: function(data){
-            console.log("Connect",data);
+            console.log("Connect", data);
             var connected = JSON.parse(data);
             $.each(nodes, function(i, n) {
                 var flag = false;
