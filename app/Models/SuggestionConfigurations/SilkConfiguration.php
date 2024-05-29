@@ -4,6 +4,9 @@ namespace App\Models\SuggestionConfigurations;
 
 use App\Models\Project;
 use App\Models\Settings;
+
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Storage;
 use Cache;
 use EasyRdf\Graph;
@@ -31,7 +34,7 @@ class SilkConfiguration
 
         //copy target ontology
         $suffix2 = ($project->target->filetype != 'ntriples') ? '.nt' : '';
-        $filePath2 = 'file:///' . storage_path('app/' . $project->source->resource);
+        $filePath2 = 'file:///' . storage_path('app/' . $project->target->resource); // Εδώ αλλάζουμε από $project->source->resource σε $project->target->resource
         $target = file_get_contents($filePath2 . $suffix2);
         Storage::disk("projects")->put("/project" . $project->id . "/target.nt", $target);
         //create the config
@@ -151,7 +154,7 @@ class SilkConfiguration
         $name = $dataset["name"];
         $file = $this->filenameTemplate($filename);
         $format = $this->formatTemplate();
-        $graph = isset ($dataset["value"][2]) ? $dataset["value"][2] : null;
+        $graph = isset($dataset["value"][2]) ? $dataset["value"][2] : null;
         $attributes = $dataset["attributes"];
         return [
             "name" => $name,
@@ -234,9 +237,30 @@ class SilkConfiguration
     {
         $id = $project->id;
         $filename = storage_path() . "/app/projects/project" . $id . "/project" . $id . "_config.xml";
-        admin_toastr('Started Job...', 'info', ['duration' => 5000]);
+        logger('Started Job...');
 
-        exec('java -d64 -Xms2048M -Xmx4096M -DconfigFile=' . $filename . ' -Dreload=true -Dthreads=4 -jar ' . app_path() . '/functions/silk/silk.jar');
+        $process = new Process([
+            'java',
+            '-Xms2048M',
+            '-Xmx4096M',
+            '-DconfigFile=' . $filename,
+            '-Dreload=true',
+            '-Dthreads=4',
+            '-jar',
+            app_path() . '/functions/silk/silk.jar'
+        ]);
+
+        try {
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+            logger("correct");
+        } catch (ProcessFailedException $exception) {
+            logger("false: " . $exception->getMessage());
+        }
         //$settingsID = $project->settings->id;
         if (Storage::disk("projects")->exists("/project" . $project->id . "/score_project" . $project->id . ".nt")) {
             Storage::disk("projects")->delete("/project" . $project->id . "/score_project" . $project->id . ".nt");
@@ -244,6 +268,7 @@ class SilkConfiguration
         //Storage::disk("projects")->move("/project" . $project->id . "/score.nt", "/project" . $project->id . "/score_project" . $project->id . ".nt");
 
         admin_toastr('Finished SiLK similarities Calculations...', 'info', ['duration' => 5000]);
+        logger("Finished SiLK similarities Calculations...");
         dispatch(new \App\Jobs\ParseScores($project, $user_id));
         //$this->parseScore($project, $user_id);
         dispatch(new \App\Jobs\Convert($project, $user_id, "source"));
@@ -252,27 +277,40 @@ class SilkConfiguration
 
     public function parseScore(Project $project, $user_id)
     {
-        $old_score = storage_path() . "/app/projects/project" . $project->id . "/" . "score.nt";
-        $score_filepath = storage_path() . "/app/projects/project" . $project->id . "/" . "score_project" . $project->id . ".nt";
-        try {
-            $command = 'rapper -i rdfxml -o ntriples ' . $old_score . ' > ' . $score_filepath;
-            $out = [];
-            logger($command);
-            exec($command, $out);
-            logger(var_dump($out));
-            admin_toastr('Converted Score Graph...', 'success', ['duration' => 5000]);
+        $old_score = storage_path() . "/app/projects/project" . $project->id . "/score.nt";
+        $score_filepath = storage_path() . "/app/projects/project" . $project->id . "/score_project" . $project->id . ".nt";
 
+        try {
+            // Parse RDF/XML file to EasyRdf Graph object
+            $graph = new Graph();
+            $graph->parseFile($old_score, 'rdfxml');
+
+            // Serialize the graph to N-Triples format
+            $ntriples = $graph->serialise('ntriples');
+
+            // Write N-Triples to file
+            file_put_contents($score_filepath, $ntriples);
+
+            admin_toastr('Converted Score Graph...', 'success', ['duration' => 5000]);
+            logger("Converted Score Graph...");
         } catch (\Exception $ex) {
             logger($ex);
         }
+
         try {
+            // Parse N-Triples file to EasyRdf Graph object
             $scores = new Graph;
             $scores->parseFile($score_filepath, "ntriples");
             admin_toastr('Parsed and Stored Graphs!', 'success', ['duration' => 5000]);
+            logger("Parsed and Stored Graphs!");
+
+            // Cache the scores graph
+            Cache::forever("scores_graph_project" . $project->id, $scores);
+            logger()->info("Scores cached successfully for project: " . $project->id);
         } catch (\Exception $ex) {
             logger($ex);
         }
+
         logger("converting files");
-        Cache::forever("scores_graph_project" . $project->id, $scores);
     }
 }

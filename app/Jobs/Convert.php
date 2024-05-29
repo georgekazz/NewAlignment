@@ -34,13 +34,16 @@ class Convert
     public function handle()
     {
         admin_toastr('Converting Graphs...', 'info', ['duration' => 5000]);
+        logger("Convering Graphs...", ['dump' => $this->dump]);
 
-        // $controller = new \App\Http\Controllers\CreatelinksController();
-        // $controller->D3_convert($this->project, $this->dump);
+
+         $controller = new \App\Admin\Controllers\CreatelinksController();
+         $controller->D3_convert($this->project, $this->dump);
 
         if($this->dump === "target"){
 
             admin_toastr('Project Ready!', 'success', ['duration' => 5000]);
+            logger("Project Ready!");
             $this->project->processed = 1;
             $this->project->save();
         }

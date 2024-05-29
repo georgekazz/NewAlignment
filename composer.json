@@ -16,6 +16,7 @@
         "open-admin-org/open-admin": "^1.0",
         "sabre/xml": "^4.0",
         "semsol/arc2": "^3.0",
+        "symfony/process": "^6.4",
         "yajra/laravel-datatables-oracle": "^10.11"
     },
     "require-dev": {

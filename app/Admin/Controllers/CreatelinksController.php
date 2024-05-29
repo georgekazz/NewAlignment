@@ -120,7 +120,7 @@ class CreatelinksController extends AdminController
         $graph = Cache::get($graph_name);
         $scores = Cache::get("scores_graph_project" . $project->id);
         $results = $scores->resourcesMatching("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity1", new \EasyRdf\Resource($iri));
-        $candidates = array();
+        $candidates = [];
         foreach ($results as $result) {
             $target = $scores->get($result, new \EasyRdf\Resource("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity2"));
             $score = $scores->get($result, new \EasyRdf\Resource("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#measure"))->getValue();
@@ -132,9 +132,10 @@ class CreatelinksController extends AdminController
                 "label" => $label,
                 "class" => $class,
             ];
-            array_push($candidates, $candidate);
+            $candidates[] = $candidate;
         }
-        return view('createlinks.partials.comparison', ["candidates" => $candidates]);
+        $candidates = collect($candidates); // Μετατροπή σε συλλογή
+        return view('createlinks.partials.comparison', compact('candidates'));
     }
 
     public function getGroups()
@@ -205,32 +206,35 @@ class CreatelinksController extends AdminController
     function find_children(Graph $graph, $hierarchic_link, $parent_url, $orderBy = null, $score = null)
     {
         $children = $graph->allResources($parent_url, $hierarchic_link);
-        $counter = 0;
         $myJSON = [];
-        $link = "skos:narrower";
-        $inverseLink = "^skos:broader";
-        
+
         foreach ($children as $child) {
             $name = $this->label($graph, $child);
             $suggestions = 0;
-    
-            if ($score !== null && $score instanceof Graph) {
+
+            if ($score !== null) {
                 $suggestions = count($score->resourcesMatching("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity1", $child));
             }
-    
-            $myJSON[$counter]['name'] = $name;
-            $myJSON[$counter]['suggestions'] = $suggestions;
-            $myJSON[$counter]['url'] = urlencode($child);
-    
-            $child_children = $this->find_children($graph, $link, $child, $orderBy, $score);
-    
-            if (empty($child_children)) {
-                $child_children = $this->find_children($graph, $inverseLink, $child, $orderBy, $score);
+
+            $child_children = [];
+
+            if ($orderBy === null) {
+                $child_children = $this->find_children($graph, "skos:narrower", $child, $orderBy, $score);
+                if (empty($child_children)) {
+                    $child_children = $this->find_children($graph, "^skos:broader", $child, $orderBy, $score);
+                }
             }
-    
-            $myJSON[$counter]['children'] = $orderBy === null ? $child_children : collect($child_children)->sortBy($orderBy)->values()->toArray();
-            $counter++;
+
+            $myJSON[] = [
+                'name' => "$name",
+                'suggestions' => $suggestions,
+                'url' => urlencode($child),
+                'children' => $child_children,
+            ];
         }
+
         return $myJSON;
     }
+
+
 }

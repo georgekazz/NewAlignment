@@ -170,14 +170,17 @@ function update(source) {
         .on("click", click);
 
     nodeEnter.append("circle")
-        .attr("cy", 0)
-        .attr("cx", -15)
-        .attr("r", 6)
-        .attr("class", indicator)
-        .style("fill", indicatorColor)
-        .style("stroke", "black")
-        .style("stroke-width", 1)
-        .on("click", click);
+      .attr("cy", 0)
+      .attr("cx", -15)
+      .attr("r", 6)
+      .attr("class", indicator)
+      .style("fill", indicatorColor)
+      .style("stroke", "black")
+      .style("stroke-width", 1)
+      .on("click", click);
+
+
+
 
     nodeEnter.append("text")
         .attr("dy", 3.5)
@@ -234,7 +237,6 @@ function click(event, d) {
     }
     clearAll(root);
     d.class = "found";
-
     if (d.data.url && d.data.url.trim() !== "") {
         $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>');
         var collapsed = $("#source_info").hasClass("collapsed-box");
@@ -245,6 +247,8 @@ function click(event, d) {
     }
     update(d);
 }
+
+
 function check_connectivity() {
     var nodes = $(".source_node")
     $.ajax({
