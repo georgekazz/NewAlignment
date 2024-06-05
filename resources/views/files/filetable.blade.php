@@ -1,3 +1,86 @@
+<style>
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        background-color: #3498db;
+        color: white;
+        border-bottom: none;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 12px 15px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #3498db;
+        color: black;
+        text-transform: uppercase;
+    }
+
+    td {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover td {
+        background-color: #dcdcdc;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .text-center img {
+        display: block;
+        margin: auto;
+        height: 20px;
+        width: 20px;
+    }
+
+    .btn-success,
+    .btn-danger,
+    .btn-primary {
+        margin: 0 5px;
+        border-radius: 50px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+</style>
+
+
 <button type="button" class="btn btn-primary custom-btn" data-bs-toggle="modal" data-bs-target="#uploadModal">
     Upload New Graph
 </button>
@@ -20,39 +103,39 @@
             </thead>
             <tbody>
                 @foreach ($files as $file)
-                <tr>
-                    <td>{{ $file->id }}</td>
-                    <td>{{ session('uploaded_filename') }}</td>
-
-                    <td>{{ $file->filetype}}</td>
-                    <td>{{ $file->created_at }}</td>
-                    <td class="text-center">
-                        @if($file->public)
-                        <img src="../img/check.png" alt="Check Icon">
+                    <tr>
+                        <td>{{ $file->id }}</td>
+                        <td>{{ $file->filename }}</td>
+                        <td>{{ $file->filetype}}</td>
+                        <td>{{ $file->created_at }}</td>
+                        <td class="text-center">
+                            @if($file->public)
+                                <img src="../img/check.png" alt="Check Icon">
+                            @else
+                                <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
+                            @endif
+                        </td>
+                        <td class="text-center">@if($file->parsed)
+                            <img src="../img/check.png" alt="Check Icon">
                         @else
-                        <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
+                            <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
                         @endif
-                    </td>
-                    <td class="text-center">@if($file->parsed)
-                        <img src="../img/check.png" alt="Check Icon">
-                        @else
-                        <img style="display: block; margin: auto;" src="../img/cross.png" alt="Cross Icon">
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        <form action="{{ url('file/parse/'.$file->id) }}" method="POST">
-                         {!! csrf_field() !!}
-                        <button title="Parse this File" class="btn btn-success">Run<span class="btn btn-success"></span></button>
-                        </form>
-                    </td> 
-                    <td class="text-center">
-                        <form action="{{ route('file.delete', ['file' => $file->id]) }}" method="POST">
-                            {!! csrf_field() !!}
-                            {!! method_field('DELETE') !!}
-                            <button title="Delete this file" type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+                        </td>
+                        <td class="text-center">
+                            <form action="{{ url('file/parse/' . $file->id) }}" method="POST">
+                                {!! csrf_field() !!}
+                                <button title="Parse this File" class="btn btn-success">Run<span
+                                        class="btn btn-success"></span></button>
+                            </form>
+                        </td>
+                        <td class="text-center">
+                            <form action="{{ route('file.delete', ['file' => $file->id]) }}" method="POST">
+                                {!! csrf_field() !!}
+                                {!! method_field('DELETE') !!}
+                                <button title="Delete this file" type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

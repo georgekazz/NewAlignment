@@ -51,6 +51,14 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/createlinks/utility/comparison/{project?}', 'App\Admin\Controllers\CreatelinksController@comparison')-> name('createlinks.comparison');
     Route::get('/createlinks/utility/connected', 'App\Admin\Controllers\LinkController@connected') -> name ('mylinks.connected');
 
-    Route::post('/linktype/update', 'App\Admin\Controllers\LinkTypeController@updateForm') -> name('linktypes.update');
+    Route::post('/linktype/update', 'App\Admin\Controllers\LinkTypeController@updateForm')->name('linktypes.update');
     Route::get('link/ajax', 'App\Admin\Controllers\LinkController@ajax')->name('links.ajax');
+
+    Route::post('createlinks/utility/link_table/{project?}', 'App\Admin\Controllers\LinkController@project_links') -> name ('createlinks.project_links');
+    Route::post('/mylinks/import', 'App\Admin\Controllers\LinkController@import') -> name ('links.import');
+    Route::get('createlinks/utility/export_table', 'App\Admin\Controllers\LinkController@export') -> name('mylinks.export');
+
+    Route::delete('createlinks/utility/delete/{id}', 'App\Admin\Controllers\LinkController@destroy') -> name('mylinks.delete');
+
+
 });

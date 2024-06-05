@@ -12,6 +12,8 @@ var i_right = 0,
     duration = 400,
     root_right;
 
+var select2Data2 = [];
+
 var tree_right = d3.tree().size([width, barHeight]);
 
 var diagonal_right = d3.linkVertical()
@@ -74,13 +76,13 @@ function target_graph(file){
             };
         });
         
-        $("#searchName2").select2({
-            data: select2DataObject2,
-            containerCssClass: "search",
-            minimumInputLength: 3,
-            placeholder: "search a target element",
-            allowClear:true
-        });
+        // $("#searchName2").select2({
+        //     data: select2DataObject2,
+        //     containerCssClass: "search",
+        //     minimumInputLength: 3,
+        //     placeholder: "search a target element",
+        //     allowClear:true
+        // });
     })
     .catch(function(error) {
         console.error('Error fetching JSON:', error);

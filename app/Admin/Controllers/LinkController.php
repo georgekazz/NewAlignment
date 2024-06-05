@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use OpenAdmin\Admin\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,7 @@ use EasyRdf\Resource as EasyRdf_Resource;
 use EasyRdf\RdfNamespace;
 use Illuminate\Contracts\Auth\Authenticatable;
 use OpenAdmin\Admin\Layout\Content;
+use Illuminate\Support\Str;
 
 class LinkController extends AdminController
 {
@@ -45,6 +48,7 @@ class LinkController extends AdminController
     public function project_links(Request $request)
     {
         session_start();
+        logger("dddd");
         $project = Project::find($request->project_id);
         return view('links.link_table', ["project" => $project]);
     }
@@ -58,7 +62,6 @@ class LinkController extends AdminController
         $connected = array();
         $entity = $type . '_entity';
         foreach ($links as $link) {
-            logger("mpainei");
             array_push($connected, $link->$entity);
         }
         $connected = array_values(array_unique($connected, SORT_REGULAR));
@@ -67,29 +70,39 @@ class LinkController extends AdminController
 
     public function create(Content $content)
     {
+        $user = Auth::guard('admin')->user();
         $input = request()->all();
         $project = Project::find($input['project_id']);
+        $sourceId = $project->source_id; // Υποθέτουμε ότι το project έχει το πεδίο source_id
         $previous = Link::where('project_id', '=', $input['project_id'])
             ->where('source_entity', '=', $input['source'])
             ->where('target_entity', '=', $input['target'])
             ->where('link_type', '=', $input['link_type'])
             ->first();
+
         if ($previous == null) {
-            $link = Link::create($input);
+            $link = new Link;
+            $link->session_id = 1; // Υποθέτουμε ότι αυτή είναι η τιμή του session_id
+            $link->updated_at = now();
+            $link->created_at = now();
             $link->project_id = $input['project_id'];
-            $link->user_id = auth()->user()->id;
-            $link->source_id = $project->source_id;
+            $link->user_id = $user->id;
+            $link->source_id = $sourceId;
             $link->target_id = $project->target_id;
             $link->source_entity = $input['source'];
             $link->target_entity = $input['target'];
+            $link->up_votes = 1;
+            $link->down_votes = 0;
+            $link->score = 1;
+            $link->status_id = 0;
             $link->link_type = $input['link_type'];
             $link->save();
             return 1;
         } else {
-
             return 0;
         }
     }
+
 
     public function import()
     {
@@ -125,7 +138,7 @@ class LinkController extends AdminController
             }
             $import->parsed = true;
             $import->save();
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $import->parsed = false;
             $import->save();
             return "Fail to parse file. Check filetype or valid syntax. Error:" . $ex;
@@ -156,7 +169,7 @@ class LinkController extends AdminController
     {
         $link = Link::findOrFail($id);
         try {
-            $this->authorize('destroy', $link);
+            // $this->authorize('destroy', $link);
             $link->delete();
             $data = [
                 "priority" => "success",
@@ -164,7 +177,7 @@ class LinkController extends AdminController
                 "message" => "Link Deleted!!!"
             ];
             return response()->json($data);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $data = [
                 "priority" => "error",
                 "title" => "Error",
@@ -280,36 +293,105 @@ class LinkController extends AdminController
         }
     }
 
-    function CreateRDFFile($myGraph, $format, $project_id)
+    public function CreateRDFFile($myGraph, $format, $project_id)
     {
-        $export = $myGraph->serialise($format);
-        $project = Project::find($project_id);
+        // Ελέγξτε αν το format είναι υποστηριζόμενο
+        $availableFormats = ['rdfxml', 'ntriples', 'turtle', 'json', 'csv'];
 
-        $File_Ext = Format::getFormat($format)->getDefaultExtension(); //get file extension
+        if (!in_array($format, $availableFormats)) {
+            throw new Exception("Format is not recognised: $format");
+        }
+
+        logger("Graph data: " . print_r($myGraph->dump(), true)); // Προσθήκη logging
+
+        if ($format === 'csv') {
+            $export = $this->createCsvExport($myGraph);
+        } else {
+            $export = $myGraph->serialise($format);
+        }
+
+        logger("Export data: " . substr($export, 0, 500)); // Προσθήκη logging
+
+        $project = Project::find($project_id);
+        $File_Ext = ($format === 'csv') ? 'csv' : Format::getFormat($format)->getDefaultExtension(); // get file extension
         $dt = Carbon::now();
-        $time = \Illuminate\Support\Str::slug($dt->format("Y m d His"));
+        $time = Str::slug($dt->format("Y m d His"));
+
         if ($project_id == null) {
             $File_Name = "Export" . $time . "." . $File_Ext;
             $NewFileName = storage_path() . "/app/projects/" . $File_Name;
             file_put_contents($NewFileName, $export);
         } else {
-            $File_Name = "Alignment_Export_" . \Illuminate\Support\Str::slug($project->name) . "_" . $time . "." . $File_Ext;
+            $File_Name = "Alignment_Export_" . Str::slug($project->name) . "_" . $time . "." . $File_Ext;
             $NewFileName = storage_path() . "/app/projects/project" . $project_id . "/" . $File_Name;
             file_put_contents($NewFileName, $export);
         }
-        LinkController::DownLoadFile($NewFileName, $File_Name, $format);
+
+        logger("File created: " . $NewFileName); // Προσθήκη logging
+
+        $this->DownLoadFile($NewFileName, $File_Name, $format);
+    }
+
+
+    private function createCsvExport($myGraph)
+    {
+        $csv = '';
+
+        // Προσθήκη των επικεφαλίδων στη CSV
+        $headers = ['Subject', 'Predicate', 'Object'];
+        $csv .= implode(',', $headers) . "\n";
+
+        // Προσθήκη των δεδομένων RDF στη CSV
+        foreach ($myGraph->resources() as $resourceUri => $resource) {
+            logger("Resource URI: " . $resourceUri); // Προσθήκη logging
+            foreach ($resource->propertyUris() as $propertyUri) {
+                logger("Property URI: " . $propertyUri); // Προσθήκη logging
+                foreach ($resource->all($propertyUri) as $object) {
+                    $objectValue = $object->isResource() ? $object->getUri() : (string) $object;
+                    logger("Object: " . $objectValue); // Προσθήκη logging
+                    $row = [
+                        (string) $resourceUri,
+                        (string) $propertyUri,
+                        $objectValue
+                    ];
+                    logger("CSV Row: " . implode(',', $row)); // Προσθήκη logging για κάθε σειρά
+                    $csv .= implode(',', $row) . "\n";
+                }
+            }
+        }
+
+        logger("Final CSV content: " . $csv); // Προσθήκη logging για το τελικό περιεχόμενο του CSV
+
+        return $csv;
+    }
+
+
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function ajax()
     {
+        logger("ajaxxxxx");
+
         $prefixes = \App\Models\Prefix::all();
+        $user = Auth::guard('admin')->user();
+
         foreach ($prefixes as $prefix) {
             RdfNamespace::set($prefix->prefix, $prefix->namespace);
         }
+
         $project = Project::find(request()->project);
+
+        if (!$project) {
+            return response()->json(['error' => 'Project not found'], 404);
+        }
+
         if (request()->route == "mylinks") {
             $links = Link::where("project_id", "=", $project->id)
-                ->where("user_id", "=", auth()->user()->id)
+                ->where("user_id", "=", $user->id)
                 ->orderBy("created_at", "desc")->get();
         } else {
             $links = Link::where("project_id", "=", $project->id)->orderBy("created_at", "desc")->get();
@@ -319,6 +401,7 @@ class LinkController extends AdminController
         $source_graph = Cache::get($project->source_id . '_graph') ?: $file->cacheGraph(\App\Models\File::find($project->source_id));
         $target_graph = Cache::get($project->target_id . '_graph') ?: $file->cacheGraph(\App\Models\File::find($project->target_id));
         $ontologies_graph = Cache::get('ontologies_graph');
+
         return Datatables::of($links)
             ->addColumn('source', function ($link) use ($source_graph) {
                 return view("links.resource", [
@@ -339,17 +422,21 @@ class LinkController extends AdminController
                 ]);
             })
             ->addColumn('action', function ($link) {
-                if ($link->user_id == auth()->user()->id || $link->project->user->id == auth()->user()->id) {
+                $currentUser = Auth::guard('admin')->user();
+                $projectOwner = $link->project->user;
+
+                if ($link->user_id == $currentUser->id || $projectOwner->id == $currentUser->id) {
                     $class = "btn";
                 } else {
                     $class = "btn disabled";
                 }
-                return '<button onclick="delete_link(' . $link->id . ')" class="' . $class . '" title="Delete this Link"><span class="glyphicon glyphicon-remove text-red"></span></button>';
 
+                return '<button onclick="delete_link(' . $link->id . ')" class="' . $class . '" title="Delete this Link" style="background-color: red; font-weight: bold; font-size: 10px; padding: 8px;"><span style="color: white;">X</span></button>';
             })
             ->addColumn('project', function ($link) {
                 return $link->project->name;
             })
             ->make(true);
     }
+
 }

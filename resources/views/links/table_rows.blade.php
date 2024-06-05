@@ -8,7 +8,7 @@
         <form action="{{ url('createlinks/utility/delete/' . $link->id) }}" method="POST">
             {!! csrf_field() !!}
             {!! method_field('DELETE') !!}
-            <button class="btn" title="Delete this Link"><span class="glyphicon glyphicon-remove text-red"></span></button>
+            <button type="submit" class="btn" title="Delete this Link"><span class="glyphicon glyphicon-remove text-red"></span></button>
         </form>
     </td>
 </tr>

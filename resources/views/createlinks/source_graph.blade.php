@@ -113,13 +113,13 @@ function source_graph(file) {
                     };
                 });
 
-            $("#searchName").select2({
-                data: select2DataObject,
-                minimumInputLength: 3,
-                containerCssClass: "search",
-                placeholder: "search a source element",
-                allowClear: true
-            });
+            // $("#searchName").select2({
+            //     data: select2DataObject,
+            //     minimumInputLength: 3,
+            //     containerCssClass: "search",
+            //     placeholder: "search a source element",
+            //     allowClear: true
+            // });
         })
         .catch(function(error) {
             console.error('There was a problem with the fetch operation:', error);
@@ -276,29 +276,32 @@ function check_connectivity() {
     });
 }
 
-function check_connectivity_right(){
-    var nodes = $(".target_node")
+function check_connectivity_right() {
+    var nodes = $(".target_node");
     $.ajax({
         type: "GET",
         url: "utility/connected",
-        data: {project_id : {{$project->id}}, type : "target"},
-        success: function(data){
+        data: { project_id: {{$project->id}}, type: "target" },
+        success: function(data) {
             var connected = JSON.parse(data);
             $.each(nodes, function(i, n) {
                 var flag = false;
-                connected.forEach(function(e, j){
-                    if (n.children[3].innerHTML === fixedEncodeURIComponent(e)){
-                        n.children[1].setAttribute("class", "connected");
-                        flag = true;
-                        return;
+                if (n.children[3]) { // Ελέγχει αν υπάρχει το τέταρτο παιδί
+                    connected.forEach(function(e, j) {
+                        if (n.children[3].innerHTML === fixedEncodeURIComponent(e)) {
+                            n.children[1].setAttribute("class", "connected");
+                            flag = true;
+                            return;
+                        }
+                    });
+                    if (n.children[1].className.baseVal === "connected" && !flag) {
+                        n.children[1].classList.remove("connected");
                     }
-                });
-                if(n.children[1].className.baseVal === "connected" && !flag){
-                    n.children[1].classList.remove("connected");
                 }
             });
             setTimeout(check_connectivity_right, 3000);
         }
     });
 }
+
 </script>

@@ -2,46 +2,66 @@
 <html>
 
 <head>
-    <style>
+<style>
         /* CSS styles for the table */
         table {
             width: 100%;
             border-collapse: collapse;
+            margin: 20px auto;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         th,
         td {
-            padding: 8px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
+            font-weight: bold;
         }
 
         /* CSS styles for the "Create a New Project" button */
         .create-project-btn {
-            margin-top: 20px;
-            margin-left: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            margin: 20px auto;
+            display: block;
+            padding: 12px 24px;
+            background-color: #28a745;
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
+
+        .create-project-btn:hover {
+            background-color: #218838;
+        }
+
 
         /* CSS styles for the tabs */
         .tab {
+            margin-bottom: 20px;
             display: inline-block;
             margin-right: 10px;
-            padding: 10px;
-            background-color: #f2f2f2;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tab:hover {
+            background-color: #E79116;
         }
 
         .active-tab {
-            background-color: #4CAF50;
+            background-color: #218838;
             color: white;
         }
 
@@ -51,7 +71,7 @@
         }
 
         .table-row:hover {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
