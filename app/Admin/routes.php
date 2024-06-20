@@ -1,9 +1,11 @@
 <?php
 
 use App\Admin\Controllers\AboutController;
+use App\Admin\Controllers\LinkController;
 use App\Admin\Controllers\ProjectController;
 use App\Admin\Controllers\SettingsController;
 use Illuminate\Routing\Router;
+use App\Admin\Controllers\RegisterController;
 
 Admin::routes();
 
@@ -27,5 +29,12 @@ Route::group([
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings','App\Admin\Controllers\SettingsController@create') -> name('settings.create');
+    Route::get('/mylinks', [LinkController::class, 'index'])->name('mylinks');
+
+    Route::get('/register', function () {
+        return view('register');
+    });
+
+
 
 });

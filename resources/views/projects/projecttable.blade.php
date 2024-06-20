@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<html>
-
-<head>
 <style>
         /* CSS styles for the table */
         table {
@@ -73,11 +69,10 @@
         .table-row:hover {
             background-color: #f8f9fa;
         }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<body>
+
 
     <!-- Create Button -->
     <button type="button" class="btn btn-primary custom-btn" data-bs-toggle="modal" data-bs-target="#createProject">
@@ -158,7 +153,7 @@
             </table>
         </div>
     </div>
-</body>
+
 
 
 
@@ -267,5 +262,3 @@
         </div>
     </div>
 </div>
-
-</html>

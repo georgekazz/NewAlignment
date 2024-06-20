@@ -5,6 +5,8 @@ use App\Admin\Controllers\ProjectController;
 use App\Admin\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 use App\Admin\Controllers\CreatelinksController;
+use App\Admin\Controllers\LinkController;
+use App\Admin\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +61,13 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('createlinks/utility/export_table', 'App\Admin\Controllers\LinkController@export') -> name('mylinks.export');
 
     Route::delete('createlinks/utility/delete/{id}', 'App\Admin\Controllers\LinkController@destroy') -> name('mylinks.delete');
+    Route::get('/mylinks', [LinkController::class, 'index'])->name('mylinks');
+
+    Route::get('/register', function () {
+        return view('register');
+    });
+
+    Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
 
 });
