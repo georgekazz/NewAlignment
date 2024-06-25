@@ -1,9 +1,11 @@
 <?php
 
 use App\Admin\Controllers\AboutController;
+use App\Admin\Controllers\CreatelinksController;
 use App\Admin\Controllers\LinkController;
 use App\Admin\Controllers\ProjectController;
 use App\Admin\Controllers\SettingsController;
+use App\Admin\Controllers\TreeController;
 use Illuminate\Routing\Router;
 use App\Admin\Controllers\RegisterController;
 
@@ -35,6 +37,6 @@ Route::group([
         return view('register');
     });
 
-
+    Route::get('/force-directed-tree', [TreeController::class, 'index'])->name('forcetreewelcome');
 
 });

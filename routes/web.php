@@ -1,8 +1,10 @@
 <?php
 
 use App\Admin\Controllers\FileController;
+use App\Admin\Controllers\FileUploadController;
 use App\Admin\Controllers\ProjectController;
 use App\Admin\Controllers\SettingsController;
+use App\Admin\Controllers\TreeController;
 use Illuminate\Support\Facades\Route;
 use App\Admin\Controllers\CreatelinksController;
 use App\Admin\Controllers\LinkController;
@@ -68,6 +70,17 @@ Route::group(['middleware' => ['web']], function () {
     });
 
     Route::post('/register', [RegisterController::class, 'register'])->name('register');
+
+    //Force Directed Tree
+    Route::get('/force-directed-tree', [TreeController::class, 'index'])->name('forcetreewelcome');
+
+    Route::get('/chart', function () {
+        return view('chart');
+    })->name('chart');
+
+    Route::post('/upload', [FileUploadController::class, 'upload'])->name('upload');
+    Route::get('/force-directed-tree-main', [TreeController::class, 'showmainpage'])->name('forcetreemain');
+    Route::get('/tree-data', [TreeController::class, 'getTreeData'])->name('tree-data');
 
 
 });

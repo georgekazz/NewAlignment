@@ -49,6 +49,19 @@
         background-color: orange;
         /* Πορτοκαλί χρώμα */
     }
+
+    .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.8); /* Μαύρο ημι-διαφανές φόντο */
+        padding: 10px; /* Εσωτερικό περιθώριο */
+        border-radius: 5px; /* Στρογγυλεμένες γωνίες */
+        bottom: 20px; /* Απόσταση από το κάτω μέρος της εικόνας */
+    }
+
+    .carousel-caption p {
+        margin: 0;
+        color: white; /* Χρώμα κειμένου λευκό */
+        font-size: 1rem; /* Μέγεθος γραμματοσειράς */
+    }
 </style>
 
 <body>
@@ -234,19 +247,35 @@
                     <div class="carousel-inner">
                         <!-- Screenshot 1 -->
                         <div class="carousel-item active">
-                            <img src="{{ asset('img/gui.png') }}" class="d-block w-100" alt="GUI Screenshot">
+                            <img src="{{ asset('img/gui.jpg') }}" class="d-block w-100" alt="GUI Screenshot">
+                            <div class="carousel-caption d-none d-md-block">
+                                <p>New Admin Panel</p>
+                            </div>
                         </div>
                         <!-- Screenshot 2 -->
                         <div class="carousel-item">
-                            <img src="{{ asset('img/flowchart.png') }}" class="d-block w-100"
+                            <img src="{{ asset('img/flowchart.jpg') }}" class="d-block w-100"
                                 alt="Flowchart Screenshot">
+                            <div class="carousel-caption d-none d-md-block">
+                                <p>Brand new layout for alignment</p>
+                            </div>
                         </div>
                         <!-- Screenshot 3 -->
                         <div class="carousel-item">
-                            <img src="{{ asset('img/checked_venn.png') }}" class="d-block w-100"
+                            <img src="{{ asset('img/checked_venn.jpg') }}" class="d-block w-100"
                                 alt="Checked Venn Screenshot">
+                            <div class="carousel-caption d-none d-md-block">
+                                <p>New page for graphs</p>
+                            </div>
                         </div>
-                        <!-- Add more screenshots as needed -->
+                        <!-- Screenshot 4 -->
+                        <div class="carousel-item">
+                            <img src="{{ asset('img/chart-img.jpg') }}" class="d-block w-100"
+                                alt="Checked Venn Screenshot">
+                            <div class="carousel-caption d-none d-md-block">
+                                <p>Check your graphs with the power of Force Directed Tree</p>
+                            </div>
+                        </div>
                     </div>
                     <!-- Carousel Navigation -->
                     <button class="carousel-control-prev" type="button" data-bs-target="#screenshotCarousel"
@@ -263,6 +292,7 @@
 
             </div>
         </section><!-- End Screenshot Section -->
+
 
 
 
@@ -303,9 +333,9 @@
             <h3>Alignment</h3>
             <p>A tool for semi-guided ontology alignment</p>
             <div class="social-links">
-                <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-                <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+                <a href="https://x.com/okfngr?lang=en&mx=2" class="twitter"><i class="bi bi-twitter"></i></a>
+                <a href="https://www.facebook.com/okfngreece/?locale=el_GR" class="facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.linkedin.com/company/okfngr/?originalSubdomain=gr" class="linkedin"><i class="bi bi-linkedin"></i></a>
             </div>
             <div class="credits">
                 <p>
