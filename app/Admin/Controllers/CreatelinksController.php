@@ -21,7 +21,13 @@ class CreatelinksController extends AdminController
     public function grid()
     {
         session_start();
-        $project = Project::find(Project::max('id'));
+
+        $url = $_SERVER['REQUEST_URI'];
+        $path = parse_url($url, PHP_URL_PATH);
+        $parts = explode('/', $path);
+        $project = end($parts);
+        
+        $project = Project::find($project);
         $this->cacheOntologies();
         $nameSource = implode("_", ["project", $project->id, "source", $project->source->id, '']);
         $nameTarget = implode("_", ["project", $project->id, "target", $project->target->id, '']);

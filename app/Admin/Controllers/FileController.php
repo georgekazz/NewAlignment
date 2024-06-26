@@ -40,6 +40,7 @@ class FileController extends AdminController
                 'filetype' => request()->input('filetype'),
                 'public' => request()->input('access_type') === 'public',
                 'parsed' => false,
+                'status' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

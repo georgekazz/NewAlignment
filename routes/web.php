@@ -81,6 +81,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/upload', [FileUploadController::class, 'upload'])->name('upload');
     Route::get('/force-directed-tree-main', [TreeController::class, 'showmainpage'])->name('forcetreemain');
     Route::get('/tree-data', [TreeController::class, 'getTreeData'])->name('tree-data');
+    Route::post('/process-file/{fileId}', [FileUploadController::class, 'processFile'])->name('process-file');
+
 
 
 });

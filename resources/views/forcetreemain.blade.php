@@ -117,8 +117,7 @@
                             <td class="px-4 py-2">{{ $file->filename }}</td>
                             <td class="px-4 py-2">{{ $file->created_at }}</td>
                             <td class="px-4 py-2 text-center">
-                                <!-- Εικονίδιο Status (κύκλος) -->
-                                <span
+                                <span id="statusCircle{{ $file->id }}"
                                     class="inline-block w-4 h-4 rounded-full {{ $file->status ? 'bg-green-500' : 'bg-red-500' }}"></span>
                             </td>
                             <td class="px-4 py-2 flex items-center justify-center">
@@ -134,7 +133,6 @@
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
-
                         </tr>
                     @endforeach
                 </tbody>
@@ -205,102 +203,71 @@
             Knowledge Foundation Greece.</p>
     </footer>
 
+
     <!-- Script -->
     <script>
-        document.getElementById('openModal').addEventListener('click', function () {
-            document.getElementById('uploadModal').classList.remove('hidden');
-        });
 
-        document.getElementById('closeModal').addEventListener('click', function () {
-            document.getElementById('uploadModal').classList.add('hidden');
-            document.getElementById('uploadMessage').innerHTML = '';
-        });
-
-        document.getElementById('uploadForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            var formData = new FormData();
-            var fileInput = document.getElementById('ttlFile');
-
-            if (fileInput.files.length === 0) {
-                document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">You must select a file</p>';
-                return;
-            }
-
-            formData.append('ttlFile', fileInput.files[0]);
-
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '{{ route("upload") }}', true);
-            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = xhr.response;
-                    if (response.includes('File uploaded successfully!')) {
-                        document.getElementById('uploadMessage').innerHTML = '<p class="text-green-500">File uploaded successfully!</p>';
-                        setTimeout(function () {
-                            document.getElementById('uploadModal').classList.add('hidden');
-                            document.getElementById('uploadMessage').innerHTML = '';
-                        }, 2000);
-                    } else {
-                        document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">File upload failed.</p>';
-                    }
-                } else {
-                    document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">An error occurred!</p>';
-                }
-            };
-
-            xhr.send(formData);
-        });
-
-        // Event listeners for Get and Run buttons
-        @foreach ($files as $file)
-            document.getElementById('openParametersModal{{ $file->id }}').addEventListener('click', function () {
-                document.getElementById('parametersModal').classList.remove('hidden');
-            });
-
-            document.getElementById('runChart{{ $file->id }}').addEventListener('click', function () {
-                alert('Open chart for file ID {{ $file->id }}');
-                // Add your logic to open the chart here
-            });
-        @endforeach
-
-        document.getElementById('closeParametersModal').addEventListener('click', function () {
-            document.getElementById('parametersModal').classList.add('hidden');
-            clearParametersForm();
-            document.getElementById('parametersMessage').classList.add('hidden');
-        });
-
-        document.getElementById('submitParameters').addEventListener('click', function () {
-            var param1 = document.getElementById('param1').value.trim();
-            var param2 = document.getElementById('param2').value.trim();
-            var parametersMessage = document.getElementById('parametersMessage');
-
-            if (param1 !== '' && param2 !== '') {
-                parametersMessage.innerHTML = '<p class="text-green-500">Parameters submitted successfully!</p>';
-                parametersMessage.classList.remove('hidden');
-
-                setTimeout(function () {
-                    document.getElementById('parametersModal').classList.add('hidden');
-                    clearParametersForm();
-                    parametersMessage.classList.add('hidden');
-                }, 2000);
-            } else {
-                parametersMessage.innerHTML = '<p class="text-red-500">Please fill in both parameters.</p>';
-                parametersMessage.classList.remove('hidden');
-            }
-        });
-
-        function clearParametersForm() {
-            document.getElementById('param1').value = '';
-            document.getElementById('param2').value = '';
-        }
-    </script>
-
-
-    <script>
+        // Εξασφαλίζει ότι ο κώδικας JavaScript εκτελείται μετά τη φόρτωση της σελίδας
         document.addEventListener('DOMContentLoaded', function () {
+            // Προσθέτει ακροατές συμβάντων και εκτελεί άλλες αρχικοποιήσεις
+            document.getElementById('openModal').addEventListener('click', function () {
+                document.getElementById('uploadModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function () {
+                document.getElementById('uploadModal').classList.add('hidden');
+                document.getElementById('uploadMessage').innerHTML = '';
+            });
+
+            document.getElementById('uploadForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                var fileInput = document.getElementById('ttlFile');
+
+                if (fileInput.files.length === 0) {
+                    document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">You must select a file</p>';
+                    return;
+                }
+
+                formData.append('ttlFile', fileInput.files[0]);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{ route("upload") }}', true);
+                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        var response = xhr.response;
+                        if (response.includes('File uploaded successfully!')) {
+                            document.getElementById('uploadMessage').innerHTML = '<p class="text-green-500">File uploaded successfully!</p>';
+                            setTimeout(function () {
+                                document.getElementById('uploadModal').classList.add('hidden');
+                                document.getElementById('uploadMessage').innerHTML = '';
+                            }, 2000);
+                        } else {
+                            document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">File upload failed.</p>';
+                        }
+                    } else {
+                        document.getElementById('uploadMessage').innerHTML = '<p class="text-red-500">An error occurred!</p>';
+                    }
+                };
+
+                xhr.send(formData);
+            });
+
+            // Event listeners for Get and Run buttons
             @foreach ($files as $file)
+                document.getElementById('openParametersModal{{ $file->id }}').addEventListener('click', function () {
+                    document.getElementById('parametersModal').classList.remove('hidden');
+                    document.getElementById('parametersForm').dataset.fileId = {{ $file->id }};
+                });
+
+                document.getElementById('runChart{{ $file->id }}').addEventListener('click', function () {
+                    alert('Open chart for file ID {{ $file->id }}');
+                    // Add your logic to open the chart here
+                });
+
                 document.getElementById('deleteFile{{ $file->id }}').addEventListener('click', function () {
                     if (confirm('Are you sure you want to delete this file?')) {
                         deleteFile({{ $file->id }});
@@ -308,30 +275,81 @@
                 });
             @endforeach
 
-            function deleteFile(fileId) {
-                var xhr = new XMLHttpRequest();
-                xhr.open('DELETE', '/file/delete/' + fileId, true);
-                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            document.getElementById('closeParametersModal').addEventListener('click', function () {
+                document.getElementById('parametersModal').classList.add('hidden');
+                clearParametersForm();
+                document.getElementById('parametersMessage').classList.add('hidden');
+            });
 
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.status === 'success') {
-                            alert('File deleted successfully!');
-                            window.location.reload();
+            document.getElementById('submitParameters').addEventListener('click', function () {
+                var param1 = document.getElementById('param1').value.trim();
+                var param2 = document.getElementById('param2').value.trim();
+                var parametersMessage = document.getElementById('parametersMessage');
+                var fileId = document.getElementById('parametersForm').dataset.fileId;
+
+                if (param1 !== '' && param2 !== '') {
+                    var formData = new FormData();
+                    formData.append('namespace', param1);
+                    formData.append('predicate', param2);
+
+                    var xhr = new XMLHttpRequest();
+                    var fileId = document.getElementById('parametersForm').dataset.fileId;
+                    var url = '{{ url("/process-file/") }}' + '/' + fileId;
+
+                    xhr.open('POST', url, true);
+                    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.status === 'success') {
+                                parametersMessage.innerHTML = '<p class="text-green-500">' + response.message + '</p>';
+                                parametersMessage.classList.remove('hidden');
+                                updateStatusCircle(fileId, true);
+                                setTimeout(function () {
+                                    document.getElementById('parametersModal').classList.add('hidden');
+                                    parametersMessage.classList.add('hidden');
+                                    clearParametersForm();
+                                }, 2000);
+                            } else {
+                                parametersMessage.innerHTML = '<p class="text-red-500">' + response.message + '</p>';
+                                parametersMessage.classList.remove('hidden');
+                                updateStatusCircle(fileId, false);
+                            }
                         } else {
-                            alert('Failed to delete file. Please try again later.');
+                            parametersMessage.innerHTML = '<p class="text-red-500">An error occurred!</p>';
+                            parametersMessage.classList.remove('hidden');
+                            updateStatusCircle(fileId, false);
                         }
-                    } else {
-                        alert('Error: ' + xhr.status);
-                    }
-                };
+                    };
 
-                xhr.send();
+                    xhr.send(formData);
+                } else {
+                    var errorMessage = 'Please fill in both parameters';
+                    parametersMessage.innerHTML = '<p class="text-red-500">' + errorMessage + '</p>';
+                    parametersMessage.classList.remove('hidden');
+                    updateStatusCircle(fileId, false);
+                }
+            });
+
+
+            function updateStatusCircle(fileId, success) {
+                var statusCircle = document.getElementById('statusCircle' + fileId);
+                if (success) {
+                    statusCircle.classList.remove('bg-red-500');
+                    statusCircle.classList.add('bg-green-500');
+                } else {
+                    statusCircle.classList.remove('bg-green-500');
+                    statusCircle.classList.add('bg-red-500');
+                }
+            }
+
+            function clearParametersForm() {
+                document.getElementById('param1').value = '';
+                document.getElementById('param2').value = '';
             }
         });
     </script>
-
 
 </body>
 
