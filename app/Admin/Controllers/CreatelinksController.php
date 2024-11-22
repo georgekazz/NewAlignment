@@ -184,6 +184,7 @@ class CreatelinksController extends AdminController
         /*
          * Iterate through all parents
          */
+        $JSON = [];
         if ($dump === "source") {
             $score = Cache::get("scores_graph_project" . $project->id);
         } else {
