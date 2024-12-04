@@ -63,10 +63,10 @@
 <script>
     $(function () {
         $('#source').slimScroll({
-            height: '250px' 
+            height: '350px' 
         });
         $('#target').slimScroll({
-            height: '250px'
+            height: '350px'
         });
     });
 </script>

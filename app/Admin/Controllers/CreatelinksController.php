@@ -75,9 +75,11 @@ class CreatelinksController extends AdminController
 
         } else {
 
-            $newfile = explode("_", explode(".", $file)[0]);
-            $this->D3_convert(Project::find($newfile[1]), $newfile[2], $newfile[4]);
-            $jsonfile = Storage::disk('public')->json('json_serializer/' . $file);
+            $newfile = explode("_", pathinfo($file, PATHINFO_FILENAME));
+            $filename = $this->D3_convert(Project::find($newfile[1]), $newfile[2], $newfile[4]);
+
+            // Επιστροφή του JSON αρχείου
+            $jsonfile = Storage::disk('public')->get($filename);
 
         }
         return (new Response($jsonfile, 200))
@@ -91,6 +93,11 @@ class CreatelinksController extends AdminController
         $file = $project->$dump;
         $graph_name = $file->id . "_graph";
         $graph = Cache::get($graph_name);
+        if ($graph) {
+            logger("Τα δεδομένα RDF βρέθηκαν στο cache για το έργο {$project->id}");
+        } else {
+            logger("Τα δεδομένα RDF ΔΕΝ βρέθηκαν στο cache για το έργο {$project->id}. Θα δημιουργηθεί νέο.");
+        }   
         $uri = urldecode($request["uri"]);
         $result = $graph->dumpResource($uri, "html");
         return $result;
@@ -98,11 +105,16 @@ class CreatelinksController extends AdminController
 
     public static function mergeGraphs(Graph $graph1, Graph $graph2)
     {
-        $data1 = $graph1->toRdfPhp();
-        $data2 = $graph2->toRdfPhp();
-        $merged = array_merge_recursive($data1, $data2);
-        unset($data1, $data2);
-        return new Graph('urn:easyrdf:merged', $merged, 'php');
+        try {
+            $data1 = $graph1->toRdfPhp();
+            $data2 = $graph2->toRdfPhp();
+            $merged = array_merge_recursive($data1, $data2);
+            unset($data1, $data2);
+            return new Graph('urn:easyrdf:merged', $merged, 'php');
+        } catch (\Exception $e) {
+            logger("Σφάλμα κατά τη συνένωση των γραφημάτων: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function short_infobox(Request $request)
@@ -160,17 +172,38 @@ class CreatelinksController extends AdminController
         try {
             $graph = new Graph;
             $suffix = ($file->filetype != 'ntriples') ? '.nt' : '';
-            $graph->parseFile(storage_path('app/' . $file->resource . $suffix), 'ntriples');
+            $filePath = storage_path('app/' . $file->resource . $suffix);
+            
+            // Έλεγχος αν το αρχείο υπάρχει πριν την ανάλυση
+            if (!file_exists($filePath)) {
+                dd("Το αρχείο RDF δεν βρέθηκε: " . $filePath);
+                abort(404, "Το αρχείο RDF δεν βρέθηκε στη διαδρομή: " . $filePath);
+            }
+
+            $graph->parseFile($filePath, 'ntriples');
+            logger("Ανάγνωση RDF αρχείου: " . storage_path('app/' . $file->resource));
             Cache::forever($file->id . "_graph", $graph);
+
             return $graph;
         } catch (\Exception $ex) {
-            error_log($ex);
+            dd("Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
+            abort(500, "Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
         }
     }
 
+
     public function D3_convert(Project $project, $dump, $orderBy = null)
     {
-        $file = $project->$dump;
+        $file = $project->$dump; 
+
+        // Εξαγωγή της διαδρομής του αρχείου από το πεδίο `resource`
+        $filePath = storage_path('app/' . $file->resource);
+
+        // Έλεγχος αν το αρχείο υπάρχει
+        if (!file_exists($filePath)) {
+            dd("Το αρχείο δεν υπάρχει στη διαδρομή: " . $filePath);
+        }
+
         /*
          * Read the graph
          */
@@ -200,6 +233,7 @@ class CreatelinksController extends AdminController
             $children = $this->find_children($graph, $firstLevelPath, $parent, $orderBy, $score);
             $JSON['children'] = $orderBy === null ? $children : collect($children)->sortBy($orderBy)->values()->toArray();
         }
+        logger("Αναγνώριση δεδομένων για το JSON: " . json_encode($JSON));
 
         /*
          * create JSON file
@@ -213,33 +247,30 @@ class CreatelinksController extends AdminController
     function find_children(Graph $graph, $hierarchic_link, $parent_url, $orderBy = null, $score = null)
     {
         $children = $graph->allResources($parent_url, $hierarchic_link);
+        $counter = 0;
         $myJSON = [];
-
+        $link = "skos:narrower";
+        $inverseLink = "^skos:broader";
         foreach ($children as $child) {
             $name = $this->label($graph, $child);
-            $suggestions = 0;
-
-            if ($score !== null) {
+            $myJSON[]["name"] = "$name";
+            if($score !== null){
                 $suggestions = count($score->resourcesMatching("http://knowledgeweb.semanticweb.org/heterogeneity/alignment#entity1", $child));
             }
-
-            $child_children = [];
-
-            if ($orderBy === null) {
-                $child_children = $this->find_children($graph, "skos:narrower", $child, $orderBy, $score);
-                if (empty($child_children)) {
-                    $child_children = $this->find_children($graph, "^skos:broader", $child, $orderBy, $score);
-                }
+            else{
+                $suggestions = 0;
+            }
+            
+            $myJSON[$counter]['suggestions'] = $suggestions;
+            $myJSON[$counter]['url'] = urlencode($child);
+            $children = $this->find_children($graph, $link, $child, $orderBy, $score);
+            if (sizeOf($children) == 0){
+                $children = $this->find_children($graph, $inverseLink, $child, $orderBy, $score);
             }
 
-            $myJSON[] = [
-                'name' => "$name",
-                'suggestions' => $suggestions,
-                'url' => urlencode($child),
-                'children' => $child_children,
-            ];
+            $myJSON[$counter]['children'] = $orderBy === null ? $children : collect($children)->sortBy($orderBy)->values()->toArray();
+            $counter++;
         }
-
         return $myJSON;
     }
 

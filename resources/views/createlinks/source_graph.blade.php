@@ -32,9 +32,10 @@ var margin = {top: 30, right: 20, bottom: 30, left: 100},
     barWidth = width * .3;
 
 var i = 0,
-    duration = 400;
+    duration = 400,
+    root;
 
-var tree = d3.tree();
+var tree = d3.tree().nodeSize([0, 20]);
 
 var diagonal = d3.linkVertical()
     .x(function(d) { return d.y; })
@@ -55,15 +56,7 @@ d3.select("svg").append("clipPath")
     .attr("width",barWidth+"px")
     .attr("height",barHeight+"px");
 
-function toggle(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    } else {
-        d.children = d._children;
-        d._children = null;
-    }
-}
+
 
 $(document).ready(function(){
     source_graph("{{$_SESSION['source_json']}}");
@@ -126,7 +119,18 @@ function source_graph(file) {
         });
 }
 
-function update(source) {
+    function toggle(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        update(d);
+    }
+
+    function update(source) {
     console.log("inside update function");
 
     if (source) {
@@ -148,20 +152,21 @@ function update(source) {
         .duration(duration)
         .style("height", height + "px");
 
-    nodes.forEach(function(n, i) {
-        n.x = i * barHeight;
+    nodes.forEach(function(d, i) {
+        d.x = i * barHeight;
+        d.y = d.depth * barHeight;
     });
 
+    
     var node = svg.selectAll("g.node")
         .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
     var nodeEnter = node.enter().append("g")
         .attr("class", "node source_node")
-        .attr("transform", function(d) { 
-            return "translate(" + (source.y0 || 0) + "," + (source.x0 || 0) + ")"; 
-        })
+        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
         .style("opacity", 1e-6);
 
+    
     nodeEnter.append("rect")
         .attr("y", -barHeight / 2)
         .attr("height", barHeight)
@@ -169,18 +174,16 @@ function update(source) {
         .style("fill", color)
         .on("click", click);
 
+    
     nodeEnter.append("circle")
-      .attr("cy", 0)
-      .attr("cx", -15)
-      .attr("r", 6)
-      .attr("class", indicator)
-      .style("fill", indicatorColor)
-      .style("stroke", "black")
-      .style("stroke-width", 1)
-      .on("click", click);
-
-
-
+        .attr("cy", 0)
+        .attr("cx", -15)
+        .attr("r", 6)
+        .attr("class", indicator)
+        .style("fill", indicatorColor)
+        .style("stroke", "black")
+        .style("stroke-width", 1)
+        .on("click", click);
 
     nodeEnter.append("text")
         .attr("dy", 3.5)
@@ -205,48 +208,39 @@ function update(source) {
 
     node.exit().transition()
         .duration(duration)
-        .attr("transform", function(d) { return "translate(" + (source.y || 0) + "," + (source.x || 0) + ")"; })
+        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
         .style("opacity", 1e-6)
         .remove();
 
     nodes.forEach(function(d) {
         d.x0 = d.x;
         d.y0 = d.y;
-        if (d.data.class === "found") {
-            $("#source").slimScroll({ scrollTo: d.x + 'px' });
-        }
     });
-
-    // const panZoomTarget = svgPanZoom('#left', {
-    //     fit: false,
-    //     zoomScaleSensitivity: 0.1,
-    //     contain: false,
-    //     center: false,
-    //     minZoom: 0.7,
-    //     mouseWheelZoomEnabled: false
-    // });
 }
 
-function click(event, d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    } else {
-        d.children = d._children;
-        d._children = null;
+
+
+
+    function click(event, d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        clearAll(root);
+        d.class = "found";
+        if (d.data.url && d.data.url.trim() !== "") {
+            $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>');
+            var collapsed = $("#source_info").hasClass("collapsed-box");
+            $("#source_info").load("utility/infobox", {"uri": d.data.url, 'dump': "source", "collapsed": collapsed, "project_id": {{$project->id}}});
+            $("#comparison").load("utility/comparison/{{$project->id}}", {"url": d.data.url});
+        } else {
+            console.error("Invalid or empty URI:", d.data.url);
+        }
+        update(d);
     }
-    clearAll(root);
-    d.class = "found";
-    if (d.data.url && d.data.url.trim() !== "") {
-        $('#comparison').html('<img id="spinner" src="../img/spinner.gif"/>');
-        var collapsed = $("#source_info").hasClass("collapsed-box");
-        $("#source_info").load("utility/infobox", {"uri": d.data.url, 'dump': "source", "collapsed": collapsed, "project_id": {{$project->id}}});
-        $("#comparison").load("utility/comparison/{{$project->id}}", {"url": d.data.url});
-    } else {
-        console.error("Invalid or empty URI:", d.data.url);
-    }
-    update(d);
-}
 
 
 function check_connectivity() {

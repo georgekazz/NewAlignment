@@ -22,32 +22,39 @@ class SilkConfiguration
 
     public function prepareProject(Project $project)
     {
-        //create project folder
-
         Storage::disk("projects")->makeDirectory("project" . $project->id);
-
-        //copy source ontology
+    
         $suffix1 = ($project->source->filetype != 'ntriples') ? '.nt' : '';
-        $filePath = 'file:///' . storage_path('app/' . $project->source->resource);
+        $filePath = storage_path('app/' . $project->source->resource);
+        
+        if (!file_exists($filePath . $suffix1)) {
+            $suffix1 = ($project->source->filetype != 'ntriples') ? '.rdf' : '';
+        }
+    
         $source = file_get_contents($filePath . $suffix1);
         Storage::disk("projects")->put("/project" . $project->id . "/source.nt", $source);
-
-        //copy target ontology
+    
         $suffix2 = ($project->target->filetype != 'ntriples') ? '.nt' : '';
-        $filePath2 = 'file:///' . storage_path('app/' . $project->target->resource); // Εδώ αλλάζουμε από $project->source->resource σε $project->target->resource
+        $filePath2 = storage_path('app/' . $project->target->resource);
+        
+        // Προσθήκη της επέκτασης αν το αρχείο δεν έχει την επέκταση .nt ή .rdf
+        if (!file_exists($filePath2 . $suffix2)) {
+            $suffix2 = ($project->target->filetype != 'ntriples') ? '.rdf' : '';
+        }
+    
         $target = file_get_contents($filePath2 . $suffix2);
         Storage::disk("projects")->put("/project" . $project->id . "/target.nt", $target);
-        //create the config
+    
         $newConfig = $this->reconstruct($project->settings->id);
-
         Storage::disk("projects")->put("/project" . $project->id . "/project" . $project->id . "_config.xml", $newConfig);
+    
         return 0;
     }
-
+    
     public function reconstruct($id)
     {
         $settings = Settings::find($id);
-        $filePath = 'file:///' . storage_path('app/uploads/project2_config.xml' . $settings->resource);
+        $filePath = storage_path('app/uploads/project2_config.xml' . $settings->resource);
         $settings_xml = file_get_contents($filePath);
         $new = $this->parseXML($settings_xml);
 
@@ -184,7 +191,7 @@ class SilkConfiguration
     public function validateSettingsFile(Settings $settings)
     {
         libxml_use_internal_errors(true);
-        $filePath = 'file:///' . storage_path('app/' . $settings->resource);
+        $filePath = storage_path('app/uploads/project2_config.xml' . $settings->resource);
 
         try {
             $contents = file_get_contents($filePath);
@@ -204,9 +211,10 @@ class SilkConfiguration
 
     public function validateAlignment(Settings $settings)
     {
-        $filePath = 'file://' . storage_path('app/' . $settings->resource);
+        $filePath = storage_path('app/uploads/project2_config.xml' . $settings->resource);
         $xml = file_get_contents($filePath);
         $parsed = $this->parseXML($xml);
+        dd("helpppppp", $parsed);
         $linkage = $this->getNode($parsed, $this->nodes[2]);
         $source = $linkage[2]["value"][0]["value"][0]["attributes"]["dataSource"];
         if ($source != "source.nt") {

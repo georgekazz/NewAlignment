@@ -1,4 +1,4 @@
-
+<html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Tailwind CSS -->
@@ -6,15 +6,10 @@
 
 <body class="bg-gray-100 flex justify-center items-center h-screen">
     <div class="text-center">
-        <button onclick="openNewWindow()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <button disabled class="bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-not-allowed">
             Μεταβείτε στο Site
         </button>
+        <p class="text-gray-600 mt-2">Το site είναι υπό ανάπτυξη. Παρακαλούμε για την υπομονή σας.</p>
     </div>
-
-    <script>
-        function openNewWindow() {
-            window.open("{{ route('forcetreemain') }}", "_blank");
-        }
-    </script>
 </body>
 </html>
