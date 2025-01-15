@@ -171,35 +171,32 @@ class CreatelinksController extends AdminController
     {
         try {
             $graph = new Graph;
-            $suffix = ($file->filetype != 'ntriples') ? '.nt' : '';
-            $filePath = storage_path('app/' . $file->resource . $suffix);
-            
-            // Έλεγχος αν το αρχείο υπάρχει πριν την ανάλυση
+
+            $filePath = storage_path('app/' . str_replace('.rdf', '', $file->resource) . '.nt');
+
             if (!file_exists($filePath)) {
-                dd("Το αρχείο RDF δεν βρέθηκε: " . $filePath);
+                logger("Το αρχείο RDF δεν βρέθηκε: " . $filePath);
                 abort(404, "Το αρχείο RDF δεν βρέθηκε στη διαδρομή: " . $filePath);
             }
 
             $graph->parseFile($filePath, 'ntriples');
-            logger("Ανάγνωση RDF αρχείου: " . storage_path('app/' . $file->resource));
+            logger("Ανάγνωση RDF αρχείου: " . $filePath);
+
             Cache::forever($file->id . "_graph", $graph);
 
             return $graph;
         } catch (\Exception $ex) {
-            dd("Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
+            logger("Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
             abort(500, "Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
         }
     }
-
 
     public function D3_convert(Project $project, $dump, $orderBy = null)
     {
         $file = $project->$dump; 
 
-        // Εξαγωγή της διαδρομής του αρχείου από το πεδίο `resource`
         $filePath = storage_path('app/' . $file->resource);
 
-        // Έλεγχος αν το αρχείο υπάρχει
         if (!file_exists($filePath)) {
             dd("Το αρχείο δεν υπάρχει στη διαδρομή: " . $filePath);
         }

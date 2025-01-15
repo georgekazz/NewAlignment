@@ -104,23 +104,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($projects as $project)
-                    <tr>
-                        <td>{{ $project->name }}</td>
-                        <td><a href='profile/{{$project->admin_user}}' title='Show user profile'>{{ $project->user_id
-                                }}</a></td>
-                        <td>{{ $project->source->filename}}</td>
-                        <td>{{ $project->target->filename}}</td>
-                        <td class="text-center">@if($project->public)
-                            <img src="../img/check.png" alt="Edit Icon" class="small-icon" height="20" width="20">
-                            @else
-                            <img src="../img/cross.png" alt="Edit Icon" class="small-icon" height="20" width="20">
-                            @endif
-                        </td>
-                        <td>{{ $project->created_at }}</td>
-
-                        <!-- Action Buttons -->
-                        <td class="text-center">
+                @foreach ($projects as $project)
+                    @if ($project->public || $project->user_id == auth()->id())
+                        <tr>
+                            <td>{{ $project->name }}</td>
+                            <td><a href='profile/{{$project->admin_user}}' title='Show user profile'>{{ $project->user_id }}</a></td>
+                            <td>{{ $project->source->filename }}</td>
+                            <td>{{ $project->target->filename }}</td>
+                            <td class="text-center">
+                                @if($project->public)
+                                    <img src="../img/check.png" alt="Edit Icon" class="small-icon" height="20" width="20">
+                                @else
+                                    <img src="../img/cross.png" alt="Edit Icon" class="small-icon" height="20" width="20">
+                                @endif
+                            </td>
+                            <td>{{ $project->created_at }}</td>
+                            <td class="text-center">
+                                <!-- Δράσεις -->
+                            
                             <form action="{{ url('settings/create_config/'.$project->id) }}" method="POST">
                                 @csrf
                                 <button title="Calculate Similarities" class="btn btn-primary custom-btn">
@@ -148,7 +149,10 @@
                             </form>
                         </td>
                     </tr>
-                    @endforeach
+                    </td>
+                        </tr>
+                    @endif
+                @endforeach
                 </tbody>
             </table>
         </div>

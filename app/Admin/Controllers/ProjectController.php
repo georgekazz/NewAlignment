@@ -13,7 +13,10 @@ class ProjectController extends AdminController
 
     public function grid()
     {
-        $projects = Project::all();
+        $projects = Project::where(function ($query) {
+            $query->where('public', true)
+                  ->orWhere('user_id', auth()->id());
+        })->get();
         return view('projects.projecttable', compact('projects'));
     }
 

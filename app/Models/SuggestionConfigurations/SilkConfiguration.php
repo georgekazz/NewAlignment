@@ -23,34 +23,39 @@ class SilkConfiguration
     public function prepareProject(Project $project)
     {
         Storage::disk("projects")->makeDirectory("project" . $project->id);
-    
-        $suffix1 = ($project->source->filetype != 'ntriples') ? '.nt' : '';
+
         $filePath = storage_path('app/' . $project->source->resource);
-        
-        if (!file_exists($filePath . $suffix1)) {
-            $suffix1 = ($project->source->filetype != 'ntriples') ? '.rdf' : '';
+
+        if (str_ends_with($project->source->resource, '.rdf')) {
+            $filePath = str_replace('.rdf', '', $filePath);
         }
-    
-        $source = file_get_contents($filePath . $suffix1);
+
+        if (!file_exists($filePath . '.nt')) {
+            logger("Το αρχείο source δεν βρέθηκε: " . $filePath . '.nt');
+        }
+
+        $source = file_get_contents($filePath . '.nt');
         Storage::disk("projects")->put("/project" . $project->id . "/source.nt", $source);
-    
-        $suffix2 = ($project->target->filetype != 'ntriples') ? '.nt' : '';
+
         $filePath2 = storage_path('app/' . $project->target->resource);
-        
-        // Προσθήκη της επέκτασης αν το αρχείο δεν έχει την επέκταση .nt ή .rdf
-        if (!file_exists($filePath2 . $suffix2)) {
-            $suffix2 = ($project->target->filetype != 'ntriples') ? '.rdf' : '';
+
+        if (str_ends_with($project->target->resource, '.rdf')) {
+            $filePath2 = str_replace('.rdf', '', $filePath2);
         }
-    
-        $target = file_get_contents($filePath2 . $suffix2);
+
+        if (!file_exists($filePath2 . '.nt')) {
+            logger("Το αρχείο target δεν βρέθηκε: " . $filePath2 . '.nt');
+        }
+
+        $target = file_get_contents($filePath2 . '.nt');
         Storage::disk("projects")->put("/project" . $project->id . "/target.nt", $target);
-    
+
         $newConfig = $this->reconstruct($project->settings->id);
         Storage::disk("projects")->put("/project" . $project->id . "/project" . $project->id . "_config.xml", $newConfig);
-    
+
         return 0;
     }
-    
+
     public function reconstruct($id)
     {
         $settings = Settings::find($id);
