@@ -15,10 +15,12 @@ class CreateFilesTable extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->increments('id');
             $table->string('filename');
+            $table->string('resource')->nullable();
             $table->timestamps();
             $table->string('filetype');
             $table->boolean('public')->default('0');
             $table->boolean('parsed')->default(false);
+            $table->boolean('status')->default(false);
         });
     }
 

@@ -22,10 +22,11 @@ class FileController extends AdminController
     {
         try {
             request()->validate([
-                'file' => 'required|mimes:rdf,xml|max:2048',
+                'file' => 'required|max:2048', // Χωρίς το mimes
                 'filetype' => 'required|in:rdf,turtle,ntriples,xml',
                 'access_type' => 'required|in:public,private',
             ]);
+            
 
             if (request()->hasFile('file')) {
                 $file = request()->file('file');
@@ -71,41 +72,57 @@ class FileController extends AdminController
     {
         $graph = new Graph();
         $filePath = Storage::path($file->resource);
-
+    
         try {
             // Έλεγχος υποστηριζόμενων τύπων αρχείου
-            $supportedFiletypes = ['ntriples', 'rdfxml', 'turtle','rdf'];
+            $supportedFiletypes = ['ntriples', 'rdfxml', 'turtle', 'rdf'];
             if (!in_array($file->filetype, $supportedFiletypes)) {
                 throw new \Exception("Unsupported filetype: " . $file->filetype);
             }
-
+    
+            // Logging αρχείου που προσπαθούμε να αναλύσουμε
+            Log::debug("Parsing file ID: {$file->id}, Path: {$filePath}, Type: {$file->filetype}");
+    
             // Ανάλυση αρχείου ή μετατροπή σε ntriples
-            if ($file->filetype != 'ntriples') {
+            if ($file->filetype !== 'ntriples') {
+                Log::debug("Converting file ID: {$file->id} to NTriples.");
                 $convertedFilePath = $this->convert($file);
+    
+                if (!file_exists($convertedFilePath)) {
+                    throw new \Exception("Converted file not found at: " . $convertedFilePath);
+                }
+    
+                Log::debug("Successfully converted file ID: {$file->id}. Converted Path: {$convertedFilePath}");
+    
                 $graph->parseFile($convertedFilePath, 'ntriples');
             } else {
+                Log::debug("Parsing NTriples file ID: {$file->id}");
                 $graph->parseFile($filePath, 'ntriples');
             }
-
+    
             // Ενημέρωση κατάστασης αρχείου
             $file->parsed = true;
             if (!$file->save()) {
                 Log::warning("Failed to update the parsed status for file ID: {$file->id}");
             }
-
+    
             // Ενημέρωση χρήστη
-            $message = $file->filetype != 'ntriples' ? 'Graph Converted and Parsed' : 'Graph Parsed';
+            $message = $file->filetype !== 'ntriples' ? 'Graph Converted and Parsed' : 'Graph Parsed';
             admin_toastr($message, 'success', ['duration' => 5000]);
-
+    
             return redirect(admin_url('mygraphs'));
-
+    
         } catch (\Exception $ex) {
-            // Διαχείριση εξαίρεσης
+            // Logging του σφάλματος
+            Log::error("Error parsing file ID: {$file->id}. Exception: " . $ex->getMessage());
+    
+            // Ενημέρωση κατάστασης σε περίπτωση σφάλματος
             $file->parsed = false;
             if (!$file->save()) {
                 Log::warning("Failed to update the parsed status for file ID: {$file->id} after error.");
             }
-            Log::error("Error parsing file ID: {$file->id}. Exception: " . $ex->getMessage());
+    
+            // Ενημέρωση χρήστη για το σφάλμα
             admin_toastr('Failed to parse the graph. Please check the logs.', 'error', ['duration' => 5000]);
             return redirect(admin_url('mygraphs'));
         }
@@ -114,46 +131,50 @@ class FileController extends AdminController
 
     public function convert(File $file)
     {
-        // Απόλυτο μονοπάτι του αρχείου
         $filePath = 'file:///' . storage_path('app/' . $file->resource);
+        $storagePath = storage_path('app/' . $file->resource);
 
-        if (!file_exists(storage_path('app/' . $file->resource))) {
-            throw new \Exception("File not found at: " . storage_path('app/' . $file->resource));
+        if (!file_exists($storagePath)) {
+            throw new \Exception("File not found at: " . $storagePath);
         }
 
-        logger('File path: ' . $filePath);
+        logger('Processing file: ' . $filePath);
 
-        // Δημιουργούμε έναν RDF/XML παράγοντα
-        $rdfXmlParser = \ARC2::getRDFXMLParser();
-        $rdfXmlParser->parse($filePath);
-
-        // Έλεγχος σφαλμάτων ανάλυσης RDF/XML
-        if (count($rdfXmlParser->errors) > 0) {
-            logger('RDF/XML parsing errors: ' . implode(", ", $rdfXmlParser->errors));
-            return 'Error parsing RDF/XML: ' . implode(", ", $rdfXmlParser->errors);
+        $extension = pathinfo($file->resource, PATHINFO_EXTENSION);
+        
+        if ($extension === 'rdf') {
+            $parser = \ARC2::getRDFParser();
+        } elseif ($extension === 'ttl') {
+            $parser = \ARC2::getTurtleParser();
+        } else {
+            throw new \Exception("Unsupported file format: " . $extension);
         }
 
-        // Λήψη τριπλών
-        $triples = $rdfXmlParser->getTriples();
-        if (empty($triples)) {
-            throw new \Exception("No triples found in the RDF/XML file.");
+        // Εκτέλεση του κατάλληλου parser
+        $parser->parse($filePath);
+
+        if (count($parser->errors) > 0) {
+            logger('Parsing errors: ' . implode(", ", $parser->errors));
+            throw new \Exception('Error parsing file: ' . implode(", ", $parser->errors));
         }
 
-        // Σειριοποίηση σε NTriples
-        $ser = \ARC2::getNTriplesSerializer();
-        $doc = $ser->getSerializedTriples($triples);
+        $triples = $parser->getTriples();
+        if (!is_array($triples) || empty($triples)) {
+            throw new \Exception("No triples found in the file or invalid format.");
+        }
 
-        // Δημιουργούμε το αρχείο NTriples
+        $serializer = \ARC2::getNTriplesSerializer();
+        $doc = $serializer->getSerializedTriples($triples);
+
         $ntFileName = pathinfo($file->resource, PATHINFO_FILENAME) . '.nt';
-        $path = Storage::path($file->resource);
-        $ntFilePath = dirname($path) . '/' . $ntFileName;
+        $ntFilePath = dirname($storagePath) . '/' . $ntFileName;
 
         if (file_put_contents($ntFilePath, $doc) === false) {
             throw new \Exception("Failed to write NTriples file at: " . $ntFilePath);
         }
 
-        // Επιστρέφουμε το απόλυτο μονοπάτι του αρχείου NTriples
         return $ntFilePath;
     }
+
 
 }

@@ -20,11 +20,13 @@ class CreateLinksTable extends Migration
             $table->integer('target_id');
             $table->string('source_entity');
             $table->string('target_entity');
-            $table->integer('link_type_id');
+            $table->integer('link_type');
             $table->integer('up_votes');
             $table->integer('down_votes');
             $table->decimal('score');
             $table->integer('status_id');
+            $table->integer('user_id');
+            $table->integer('project_id');
         });
     }
 

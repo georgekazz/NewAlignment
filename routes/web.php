@@ -25,6 +25,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/register', function () {
+    return view('register');
+});
+
+Route::post('/register', [RegisterController::class, 'register'])->name('register');
+
 Route::group(['middleware' => ['web']], function () {
     
     Route::view('/login', 'auth.login')->name('login');
@@ -64,12 +70,6 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::delete('createlinks/utility/delete/{id}', 'App\Admin\Controllers\LinkController@destroy') -> name('mylinks.delete');
     Route::get('/mylinks', [LinkController::class, 'index'])->name('mylinks');
-
-    Route::get('/register', function () {
-        return view('register');
-    });
-
-    Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
     //Force Directed Tree
     Route::get('/force-directed-tree', [TreeController::class, 'index'])->name('forcetreewelcome');
