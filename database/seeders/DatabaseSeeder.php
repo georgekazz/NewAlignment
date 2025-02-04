@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('link_types')->truncate();
-        DB::table('link_types')->insert(
+        DB::table('link_roles')->truncate();
+        DB::table('link_roles')->insert(
         [
             'id' => 1,
             'name' => "Administrator",
@@ -213,9 +213,9 @@ class DatabaseSeeder extends Seeder
             'id' => 1,
             'parent_id' => 0,
             'order' => 1,
-            'name' => 'Dashboard',
+            'title' => 'Dashboard',
             'icon' => 'icon-chart-bar',
-            'url' => '/',
+            'uri' => '/',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -223,9 +223,9 @@ class DatabaseSeeder extends Seeder
             'id' => 2,
             'parent_id' => 0,
             'order' => 2,
-            'name' => 'My Ontologies',
+            'title' => 'My Ontologies',
             'icon' => 'icon-adjust',
-            'url' => '/mygraphs',
+            'uri' => '/mygraphs',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -233,9 +233,9 @@ class DatabaseSeeder extends Seeder
             'id' => 3,
             'parent_id' => 0,
             'order' => 3,
-            'name' => 'My Projects',
+            'title' => 'My Projects',
             'icon' => 'icon-atom',
-            'url' => '/myprojects',
+            'uri' => '/myprojects',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -243,9 +243,9 @@ class DatabaseSeeder extends Seeder
             'id' => 4,
             'parent_id' => 0,
             'order' => 4,
-            'name' => 'Profile',
+            'title' => 'Profile',
             'icon' => 'icon-address-card',
-            'url' => '/profile',
+            'uri' => '/profile',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -253,9 +253,9 @@ class DatabaseSeeder extends Seeder
             'id' => 5,
             'parent_id' => 0,
             'order' => 5,
-            'name' => 'My Links',
+            'title' => 'My Links',
             'icon' => 'icon-align-justify',
-            'url' => '/mylinks',
+            'uri' => '/mylinks',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -263,9 +263,9 @@ class DatabaseSeeder extends Seeder
             'id' => 6,
             'parent_id' => 0,
             'order' => 6,
-            'name' => 'Force Directed Tree',
+            'title' => 'Force Directed Tree',
             'icon' => 'icon-file-image',
-            'url' => '/force-directed-tree',
+            'uri' => '/force-directed-tree',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -273,9 +273,9 @@ class DatabaseSeeder extends Seeder
             'id' => 7,
             'parent_id' => 0,
             'order' => 7,
-            'name' => 'Settings',
+            'title' => 'Settings',
             'icon' => 'icon-tools',
-            'url' => '/settings',
+            'uri' => '/settings',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ],
@@ -283,9 +283,9 @@ class DatabaseSeeder extends Seeder
             'id' => 8,
             'parent_id' => 0,
             'order' => 8,
-            'name' => 'About',
+            'title' => 'About',
             'icon' => 'icon-info',
-            'url' => '/about',
+            'uri' => '/about',
             'created_at' => Carbon::parse('2024-06-12 10:02:09'),
             'updated_at' => Carbon::parse('2024-06-12 10:02:09')
         ]
@@ -296,18 +296,17 @@ class DatabaseSeeder extends Seeder
             'id' => 1,
             'name' => 'All permissions',
             'slug' => '*',
-            'htto_path' => '*',
+            'http_path' => '*',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]
     
     ]);
 
-    DB::table('admin_roles')->insert([
+    DB::table('admin_role_users')->insert([
         [ 
-            'id' => 1,
-            'name' => 'Administrator',
-            'slug' => 'administrator',
+            'role_id' => 1,
+            'user_id' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]

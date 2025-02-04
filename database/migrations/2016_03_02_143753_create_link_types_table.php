@@ -14,11 +14,11 @@ class CreateLinkTypesTable extends Migration
     {
         Schema::create('link_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->after('id')->nullable();
-            $table->text('group')->after('user_id')->nullable();
-            $table->text('inner')->after('group')->nullable();
-            $table->text('value')->after('inner')->nullable();
-            $table->boolean('public')->after('value')->default(0);
+            $table->integer('user_id')->nullable();
+            $table->text('group')->nullable();
+            $table->text('inner')->nullable();
+            $table->text('value')->nullable();
+            $table->boolean('public')->default(0);
             $table->timestamps();
         });
     }

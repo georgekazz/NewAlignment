@@ -15,7 +15,7 @@ class CreateSettingsTable extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->onDelete('cascade');
             $table->boolean('valid')->default(true);
             $table->boolean('public')->default(false);
             $table->timestamps();
@@ -23,7 +23,7 @@ class CreateSettingsTable extends Migration
             $table->integer('resource_file_size')->nullable();
             $table->string('resource_content_type')->nullable();
             $table->timestamp('resource_updated_at')->nullable();
-            $table->foreignId('suggestion_provider_id')->constrained('suggestion_providers')->onDelete('cascade');
+            $table->foreignId('suggestion_provider_id')->onDelete('cascade');
         });
     }
 
