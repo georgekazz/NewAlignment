@@ -26,8 +26,8 @@ class SilkConfiguration
 
         $filePath = storage_path('app/' . $project->source->resource);
 
-        if (str_ends_with($project->source->resource, '.rdf')) {
-            $filePath = str_replace('.rdf', '', $filePath);
+        if (str_ends_with($project->source->resource, '.rdf') || str_ends_with($project->source->resource, '.ttl')) {
+            $filePath = preg_replace('/\.(rdf|ttl)$/', '', $filePath);
         }
 
         if (!file_exists($filePath . '.nt')) {
@@ -39,8 +39,8 @@ class SilkConfiguration
 
         $filePath2 = storage_path('app/' . $project->target->resource);
 
-        if (str_ends_with($project->target->resource, '.rdf')) {
-            $filePath2 = str_replace('.rdf', '', $filePath2);
+        if (str_ends_with($project->target->resource, '.rdf') || str_ends_with($project->target->resource, '.ttl')) {
+            $filePath2 = preg_replace('/\.(rdf|ttl)$/', '', $filePath2);
         }
 
         if (!file_exists($filePath2 . '.nt')) {
@@ -55,6 +55,7 @@ class SilkConfiguration
 
         return 0;
     }
+
 
     public function reconstruct($id)
     {

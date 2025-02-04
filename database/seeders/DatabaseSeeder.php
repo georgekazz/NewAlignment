@@ -208,5 +208,143 @@ class DatabaseSeeder extends Seeder
         'updated_at' => now(),
     ]);
 
+    DB::table('admin_menu')->insert([
+        [
+            'id' => 1,
+            'parent_id' => 0,
+            'order' => 1,
+            'name' => 'Dashboard',
+            'icon' => 'icon-chart-bar',
+            'url' => '/',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 2,
+            'parent_id' => 0,
+            'order' => 2,
+            'name' => 'My Ontologies',
+            'icon' => 'icon-adjust',
+            'url' => '/mygraphs',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 3,
+            'parent_id' => 0,
+            'order' => 3,
+            'name' => 'My Projects',
+            'icon' => 'icon-atom',
+            'url' => '/myprojects',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 4,
+            'parent_id' => 0,
+            'order' => 4,
+            'name' => 'Profile',
+            'icon' => 'icon-address-card',
+            'url' => '/profile',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 5,
+            'parent_id' => 0,
+            'order' => 5,
+            'name' => 'My Links',
+            'icon' => 'icon-align-justify',
+            'url' => '/mylinks',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 6,
+            'parent_id' => 0,
+            'order' => 6,
+            'name' => 'Force Directed Tree',
+            'icon' => 'icon-file-image',
+            'url' => '/force-directed-tree',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 7,
+            'parent_id' => 0,
+            'order' => 7,
+            'name' => 'Settings',
+            'icon' => 'icon-tools',
+            'url' => '/settings',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ],
+        [
+            'id' => 8,
+            'parent_id' => 0,
+            'order' => 8,
+            'name' => 'About',
+            'icon' => 'icon-info',
+            'url' => '/about',
+            'created_at' => Carbon::parse('2024-06-12 10:02:09'),
+            'updated_at' => Carbon::parse('2024-06-12 10:02:09')
+        ]
+    ]);
+
+    DB::table('admin_permissions')->insert([
+        [ 
+            'id' => 1,
+            'name' => 'All permissions',
+            'slug' => '*',
+            'htto_path' => '*',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]
+    
+    ]);
+
+    DB::table('admin_roles')->insert([
+        [ 
+            'id' => 1,
+            'name' => 'Administrator',
+            'slug' => 'administrator',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]
+    
+    ]);
+
+    DB::table('admin_role_menu')->insert([
+        [ 
+            'role_id' => 1,
+            'menu_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]
+    
+    ]);
+
+    DB::table('admin_role_permissions')->insert([
+        [ 
+            'role_id' => 1,
+            'permission_id' => 1,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]
+    
+    ]);
+
+    DB::table('admin_users')->insert([
+        [ 
+            'id' => 1,
+            'username' => 'admin',
+            'password' => '$2y$12$zxUb/895aZp5eRfjQw2X5OzVuISVT7fL9ZQqHRgT4Gkdu9ca0VzA2',
+            'name' => 'Administrator',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]
+    
+    ]);
+    
     }
 }

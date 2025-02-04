@@ -8,25 +8,36 @@ Alignment is an application designed to address the challenges of ontology match
 - PHP
 - PHP capable web server
 - MySQL
-- Java 8
+- Java
+- Open Admin
 
-## Installation steps
-<pre><code class="language-html">
+## Installation Steps
+```bash
 # Clone the repo from Github
 git clone -b main https://github.com/georgekazz/NewAlignment.git
+```
 
+```bash
 # Run the Composer
 composer install
+```
 
+```bash
 # This will copy the contents of the .env.example file into the .env file.
 copy .env.example .env
+```
 
+```bash
 # Run the Migrations
 php artisan migrate
+```
 
+```bash
 # Seed the Database
 php artisan db:seed
+```
 
+```bash
 # Run the Server
 php artisan serve
-</code></pre>
+```

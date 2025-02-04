@@ -172,24 +172,34 @@ class CreatelinksController extends AdminController
         try {
             $graph = new Graph;
 
-            $filePath = storage_path('app/' . str_replace('.rdf', '', $file->resource) . '.nt');
+            // Αφαίρεση .rdf ή .ttl αν υπάρχει
+            $filePath = storage_path('app/' . preg_replace('/\.(rdf|ttl)$/', '', $file->resource) . '.nt');
 
             if (!file_exists($filePath)) {
-                logger("Το αρχείο RDF δεν βρέθηκε: " . $filePath);
-                abort(404, "Το αρχείο RDF δεν βρέθηκε στη διαδρομή: " . $filePath);
+                logger(" Το αρχείο NT ΔΕΝ βρέθηκε: " . $filePath);
+                abort(404, "Το αρχείο NT δεν βρέθηκε: " . $filePath);
             }
 
+            // Έλεγχος αν το αρχείο είναι αναγνώσιμο
+            if (!is_readable($filePath)) {
+                logger(" Το αρχείο υπάρχει αλλά δεν είναι αναγνώσιμο: " . $filePath);
+                abort(500, "Το αρχείο υπάρχει αλλά δεν είναι αναγνώσιμο: " . $filePath);
+            }
+
+            // Ανάγνωση αρχείου
+            logger(" Το αρχείο βρέθηκε! Διαβάζω από: " . $filePath);
             $graph->parseFile($filePath, 'ntriples');
-            logger("Ανάγνωση RDF αρχείου: " . $filePath);
+            logger(" Επιτυχής ανάγνωση RDF: " . $filePath);
 
             Cache::forever($file->id . "_graph", $graph);
 
             return $graph;
         } catch (\Exception $ex) {
-            logger("Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
-            abort(500, "Σφάλμα κατά την ανάγνωση του RDF: " . $ex->getMessage());
+            logger(" Σφάλμα κατά την ανάγνωση RDF: " . $ex->getMessage());
+            abort(500, "Σφάλμα κατά την ανάγνωση RDF: " . $ex->getMessage());
         }
     }
+
 
     public function D3_convert(Project $project, $dump, $orderBy = null)
     {
