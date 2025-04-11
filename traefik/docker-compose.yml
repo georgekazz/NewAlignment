@@ -1,0 +1,36 @@
+networks:
+  traefik-net:
+    external: true
+
+services:
+
+  traefik:
+    image: "traefik:v3.3"
+    container_name: "traefik-reverse-proxy"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/traefik-dynamic.yml"
+      - "--entryPoints.web.address=:80"
+      # Configure HTTPS entrypoint with the Cloudflare Origin Certificate:
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./certs:/certs:ro
+      - "./traefik-dynamic.yml:/traefik-dynamic.yml:ro"
+    networks:
+      - traefik-net
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.okfn.gr`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
