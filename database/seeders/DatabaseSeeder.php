@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('link_roles')->truncate();
-        DB::table('link_roles')->insert(
+        DB::table('admin_roles')->truncate();
+        DB::table('admin_roles')->insert(
         [
             'id' => 1,
             'name' => "Administrator",

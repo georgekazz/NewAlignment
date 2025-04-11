@@ -49,15 +49,25 @@ trait RDFTrait
 
     public static function label(Graph $graph, $uri)
     {
+        // Αν το γράφημα είναι άδειο ή το URI δεν υπάρχει, επιστρέφουμε το URI
+        if (!$graph || !$uri) {
+            return basename($uri);
+        }
+
+        // Λίστα πιθανών properties που μπορεί να περιέχουν ετικέτα
         $labelProperties = [
             'http://www.w3.org/2000/01/rdf-schema#label',
             'http://www.w3.org/2004/02/skos/core#prefLabel',
-            'http://purl.org/dc/terms/title'
+            'http://purl.org/dc/terms/title',
+            'http://xmlns.com/foaf/0.1/name',
+            'https://schema.org/name',
+            'http://purl.org/dc/elements/1.1/title'
         ];
 
         $label = null;
         $locale = Cookie::get('locale');
 
+        // Έλεγχος για κάθε property στη λίστα
         foreach ($labelProperties as $property) {
             $label = $graph->getLiteral($uri, new \EasyRdf\Resource($property), $locale)
                 ?? $graph->getLiteral($uri, new \EasyRdf\Resource($property), 'en')
@@ -68,8 +78,8 @@ trait RDFTrait
             }
         }
 
-        $label = $label ?? RdfNamespace::shorten($uri, true);
-
-        return $label;
+        // Αν δεν βρεθεί label, παίρνουμε το τελευταίο κομμάτι του URI
+        return $label ? $label->getValue() : basename($uri);
     }
+
 }
