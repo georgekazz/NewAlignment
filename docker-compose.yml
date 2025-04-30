@@ -17,7 +17,7 @@ services:
       APP_DEBUG: "true"
       APP_URL: http://localhost
       DB_CONNECTION: mysql
-      DB_HOST: db
+      DB_HOST: db-alignemnt
       DB_PORT: 3306
       DB_DATABASE: laravel
       DB_USERNAME: root
@@ -28,7 +28,7 @@ services:
     networks:
       - traefik-net
     depends_on:
-      db:
+      db-alignment:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
@@ -36,7 +36,7 @@ services:
       - "traefik.http.routers.webapp.entrypoints=websecure"
       - "traefik.http.routers.webapp.tls=true"
       - "traefik.http.services.webapp.loadbalancer.server.port=80"
-  db:
+  db-alignment:
     image: mysql:8.0
     container_name: alignment-db
     restart: always

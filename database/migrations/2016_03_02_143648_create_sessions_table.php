@@ -13,15 +13,20 @@ class CreateSessionsTable extends Migration
     public function up()
     {
         Schema::create('sessions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('source_id');
-            $table->integer('target_id');
+            $table->string('id')->primary(); // Laravel uses string session IDs
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->text('payload'); // This is where Laravel stores session data
+            $table->integer('last_activity')->index();
+
+            // Custom fields (if needed)
+            $table->integer('source_id')->nullable();
+            $table->integer('target_id')->nullable();
             $table->timestamp('ended_at')->nullable();
-            $table->nullableTimestamps(); // Προσθήκη των created_at και updated_at με την δυνατότητα να είναι null
+            $table->nullableTimestamps(); // created_at and updated_at (nullable)
         });
     }
-
     /**
      * Reverse the migrations.
      *
