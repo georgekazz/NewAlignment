@@ -16,13 +16,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         DB::table('admin_roles')->truncate();
-        DB::table('admin_roles')->insert(
-        [
+
+        DB::table('admin_roles')->insert([
             'id' => 1,
-            'name' => "Administrator",
-            'slug' => "administrator",
+            'name' => 'Administrator',
+            'slug' => 'administrator',
             'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(), 
+            'updated_at' => Carbon::now(),
         ]);
 
         DB::table('label_extractors')->truncate();
