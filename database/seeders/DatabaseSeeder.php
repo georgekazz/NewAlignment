@@ -23,9 +23,7 @@ class DatabaseSeeder extends Seeder
             'slug' => "administrator",
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(), 
-        [ 
-
-        ]]);
+        ]);
 
         DB::table('label_extractors')->truncate();
         $label1 = new LabelExtractor();
